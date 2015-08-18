@@ -61,7 +61,7 @@ void SpMatRead::connect(BaseModule *dependency) {
     }
 }
 
-float SpMatRead::propagate() {
+void SpMatRead::propagate() {
     addr = (patch_complete_p)?start_addr : start_addr_nextline * unit_line;
     memory_addr = addr / unit_line;
     addr_residue = addr % unit_line;
@@ -88,11 +88,9 @@ float SpMatRead::propagate() {
     shift_equal = memory_shift == (end_addr % unit_line);
     line_complete = (line_last)?shift_equal : (memory_shift == (unit_line - 1));
     patch_complete = line_last && shift_equal;
-
-    return 0.0;
 }
 
-float SpMatRead::update() {
+void SpMatRead::update() {
     if (valid) {
         line_complete_p = line_complete;
         current_addr_shift = current_addr_shift_D;
@@ -109,6 +107,5 @@ float SpMatRead::update() {
         valid = *valid_D;
         value = *value_D;
     }
-    return 0.0;
 }
 

@@ -5,59 +5,60 @@
 
 using namespace std;
 
-PtrRead::PtrRead(int id) :BaseModule(id) {}
+NzeroFetch::NzeroFetch() :BaseModule() {}
+void NzeroFetch::propagate() {
+    act_index_output[0] = 3;
+    value_output[0] = 2;
+    empty[0] = 1;
+}
+void NzeroFetch::update() {}
+void NzeroFetch::connect(BaseModule *dependency) {}
 
-PtrRead::~PtrRead(){}
-
-void init(char *datafile) {}
-
-void PtrRead::propagate(){start_addr = 2; end_addr = 20;valid=1;}
-
-void PtrRead::update() {}
-
-void PtrRead::connect(BaseModule *dependency) {}
 
 int main() {
     PtrRead PtrR_M(0);
     SpMatRead SPMat_M(0);
+    NzeroFetch NZF_M;
 
     SPMat_M.init("test_data/spmatrix.dat");
+    PtrR_M.init("test_data/ptrvec.dat");
+
     SPMat_M.connect(static_cast<BaseModule*>(&PtrR_M));
+    PtrR_M.connect(static_cast<BaseModule*>(&NZF_M));
+    PtrR_M.connect(static_cast<BaseModule*>(&SPMat_M));
+
     vector<BaseModule*> modules;
     modules.push_back(static_cast<BaseModule*>(&PtrR_M));
     modules.push_back(static_cast<BaseModule*>(&SPMat_M));
+    modules.push_back(static_cast<BaseModule*>(&NZF_M));
 
     int cycles = 35;
     for (int i = 0; i < cycles; i++) {
         modules[1]->propagate();
-        if (i==0) {
-            PtrR_M.propagate();
+        modules[0]->propagate();
+        modules[2]->propagate();
+
+        if (i==2) {
+            NZF_M.empty[0] = 0;
         }
-        else if (i==19) {
-            PtrR_M.start_addr = 22;
-            PtrR_M.end_addr = 29;
+        else if (i == 3) {
+            NZF_M.act_index_output[0] = 5;
         }
-        else if (i>23 && i <= 30) {
-            PtrR_M.start_addr = 30;
-            PtrR_M.end_addr = 29;
-            PtrR_M.valid = 0;
-        }
-        else if (i == 31) {
-            PtrR_M.start_addr = 38;
-            PtrR_M.end_addr = 38;
-            PtrR_M.valid = 1;
+        else if (i == 4) {
+            NZF_M.empty[0] = 1;
         }
 
         std::cout << "Cycles:" << i << std::endl;
+        P_V(PtrR_M.act_index);
+        P_V(PtrR_M.empty);
+        P_V(PtrR_M.index_odd);
+        P_V(PtrR_M.start_addr);
+        P_V(PtrR_M.valid);
+
         P_V(SPMat_M.start_addr);
-        P_V(SPMat_M.end_addr);
         P_V(SPMat_M.index);
-        P_V(SPMat_M.code);
         P_V(SPMat_M.valid);
         P_V(SPMat_M.valid_next);
-        P_V(SPMat_M.memory_addr);
-        P_V(SPMat_M.memory_shift);
-        P_V(SPMat_M.line_complete);
         P_V(SPMat_M.patch_complete);
         std::cout << "==========================================="<<std::endl;
 
@@ -67,6 +68,3 @@ int main() {
 
     }
 }
-        
-        
-

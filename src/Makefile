@@ -1,16 +1,26 @@
 
 CXX=g++
-FLAGS=-Wall -O2 -g
-O_FILES=spmat.o test_spmat.o
-C_FILES=spmat.cpp test_spmat.cpp
+FLAGS=-Wall -O2 
+TEST_FLAGS=-Wall -g
+
+O_FILES=spmat.o 
+C_FILES=spmat.cpp 
 H_FILES=module.h configs.h
 EXE=
-TEST=test
+
+TEST_C_FILES=test_spmat.cpp
+TEST_O_FILES=test_spmat.o
+TEST_EXE=test
 
 # all: $(O_FILES)
     
-test: $(O_FILES) $(H_FILES)
-	$(CXX) -o $(TEST) $(O_FILES)
+test_ptrvec: $(H_FILES) spmat.cpp ptrvec.cpp test_ptrvec.cpp
+	$(CXX) -c test_ptrvec.cpp spmat.cpp ptrvec.cpp $(TEST_FLAGS)
+	$(CXX) -o $(TEST_EXE) spmat.o test_ptrvec.o ptrvec.o
+
+test_spmat: $(H_FILES) spmat.cpp test_spmat.cpp
+	$(CXX) -c test_spmat.cpp spmat.cpp $(TEST_FLAGS)
+	$(CXX) -o $(TEST_EXE) spmat.o test_spmat.o
 
 $(O_FILES): $(C_FILES) $(H_FILES)
 	$(CXX) -c $(FLAGS) $(C_FILES) 

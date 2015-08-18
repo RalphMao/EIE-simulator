@@ -3,11 +3,12 @@
 #define MODULE
 
 #include<stdint.h>
+#include"configs.h"
 
 typedef int32_t Register;
 typedef int32_t Wire;
 typedef int32_t* Memory;
-typedef int32_t* SharedWire;
+typedef const int32_t* SharedWire;
 
 enum ModuleType {
     Base_k,
@@ -27,12 +28,31 @@ class BaseModule {
     BaseModule() {module_id=0;}
     BaseModule(int id) {module_id=id;}
     virtual ~BaseModule() {}
-    virtual float propagate() = 0;
-    virtual float update() = 0;
+    virtual void propagate() = 0;
+    virtual void update() = 0;
     virtual void connect(BaseModule *dependency) = 0;
     virtual inline ModuleType name() { return Base_k;}
     inline int id() { return module_id;}
     int module_id;
+};
+
+class NzeroFetch : public BaseModule {
+    public:
+    NzeroFetch();
+    virtual ~NzeroFetch() {}
+    virtual void propagate();
+    virtual void update();
+    virtual void connect(BaseModule *dependency);
+    virtual inline ModuleType name() { return NzeroFetch_k;}
+
+    Register pack_addr, pack_shift;
+    Register pos_read[NUM_PE], pos_write[NUM_PE];
+    Register act_index[NUM_PE][NZFETCH_buffersize], value[NUM_PE][NZFETCH_buffersize];
+
+    Wire act_index_output[NUM_PE], value_output[NUM_PE];
+    Wire empty[NUM_PE], full[NUM_PE];
+
+    SharedWire patch_complete[NUM_PE], valid_ptr[NUM_PE];
 };
 
 class SpMatRead : public BaseModule {
@@ -40,8 +60,8 @@ class SpMatRead : public BaseModule {
     SpMatRead(int id);
     virtual ~SpMatRead();
     void init(char *datafile);
-    virtual float propagate();
-    virtual float update();
+    virtual void propagate();
+    virtual void update();
     virtual void connect(BaseModule *dependency);
     virtual inline ModuleType name() { return SpMatRead_k;}
 
@@ -72,12 +92,20 @@ class PtrRead : public BaseModule {
     public:
     PtrRead(int id); 
     virtual ~PtrRead();
+    void init(char *datafile);
     virtual inline ModuleType name() { return PtrRead_k;}
-    virtual float propagate();
-    virtual float update();
+    virtual void propagate();
+    virtual void update();
     virtual void connect(BaseModule *dependency);
 
-    Wire start_addr, end_addr, valid, value;
+    Register act_index, value, empty;
+    Wire start_addr, end_addr, valid;
+    Wire index_odd, index_even;
+    SharedWire act_index_D, value_D, empty_D, patch_complete;
+
+    Memory PTRmem;
+    
+    int num_lines;
 };
 
 #endif
