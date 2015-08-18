@@ -88,6 +88,8 @@ void SpMatRead::propagate() {
     shift_equal = memory_shift == (end_addr % unit_line);
     line_complete = (line_last)?shift_equal : (memory_shift == (unit_line - 1));
     patch_complete = line_last && shift_equal;
+
+    read = patch_complete || !valid;
 }
 
 void SpMatRead::update() {
@@ -101,7 +103,7 @@ void SpMatRead::update() {
         }
     }
 
-    if (patch_complete || !valid) {
+    if (read) {
         start_addr = *start_addr_D; 
         end_addr = *end_addr_D;
         valid = *valid_D;

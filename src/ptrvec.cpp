@@ -50,7 +50,7 @@ void PtrRead::propagate() {
 }
 
 void PtrRead::update() {
-    if (!(valid && !(*patch_complete))) {
+    if (!valid ||(*read_sp)) {
         act_index = *act_index_D;
         value = *value_D;
         empty = *empty_D;
@@ -63,7 +63,7 @@ void PtrRead::connect(BaseModule *dependency) {
              LOG_ERROR("Module ID does not match!");
         }
         SpMatRead* module_d = static_cast<SpMatRead*>(dependency);
-        patch_complete = static_cast<SharedWire>(&(module_d->patch_complete));
+        read_sp = static_cast<SharedWire>(&(module_d->read));
         
     }
     else if (dependency->name() == NzeroFetch_k) {

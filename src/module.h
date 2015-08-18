@@ -77,7 +77,7 @@ class SpMatRead : public BaseModule {
     Wire addr, addr_residue;
     Wire memory_addr_shift;
     Wire *data_read;
-
+    Wire read;
 
     SharedWire start_addr_D, end_addr_D, valid_D, value_D;
 
@@ -101,7 +101,7 @@ class PtrRead : public BaseModule {
     Register act_index, value, empty;
     Wire start_addr, end_addr, valid;
     Wire index_odd, index_even;
-    SharedWire act_index_D, value_D, empty_D, patch_complete;
+    SharedWire act_index_D, value_D, empty_D, read_sp;
 
     Memory PTRmem;
     

@@ -32,11 +32,11 @@ int main() {
     modules.push_back(static_cast<BaseModule*>(&SPMat_M));
     modules.push_back(static_cast<BaseModule*>(&NZF_M));
 
-    int cycles = 35;
+    int cycles = 40;
+    modules[2]->propagate();
     for (int i = 0; i < cycles; i++) {
         modules[1]->propagate();
         modules[0]->propagate();
-        modules[2]->propagate();
 
         if (i==2) {
             NZF_M.empty[0] = 0;
@@ -47,8 +47,14 @@ int main() {
         else if (i == 4) {
             NZF_M.empty[0] = 1;
         }
+        else if (i == 37) {
+            NZF_M.empty[0] = 0;
+            NZF_M.act_index_output[0] = 7;
+        }
 
         std::cout << "Cycles:" << i << std::endl;
+        P_V(NZF_M.empty[0]);
+
         P_V(PtrR_M.act_index);
         P_V(PtrR_M.empty);
         P_V(PtrR_M.index_odd);
@@ -56,7 +62,9 @@ int main() {
         P_V(PtrR_M.valid);
 
         P_V(SPMat_M.start_addr);
+        P_V(SPMat_M.end_addr);
         P_V(SPMat_M.index);
+        P_V(SPMat_M.memory_addr_shift);
         P_V(SPMat_M.valid);
         P_V(SPMat_M.valid_next);
         P_V(SPMat_M.patch_complete);

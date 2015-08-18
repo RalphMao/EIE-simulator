@@ -25,17 +25,19 @@ inline void Message(const char *func, const char *file, int line, std::string x)
 }
 
 inline void MessageError(const char *func, const char *file, int line, std::string x) {
+    std::cerr << "=====================================================================" << std::endl;
     std::cerr << "ERROR:       #call from " << func << "(): " << file << ':' << line << "#" <<  std::endl;
     std::cerr << ">>> " << x << std::endl;
     void *array[10];
     size_t size = backtrace(array,10);
     char **strings = backtrace_symbols(array, size);
-    std::cerr << "##############Stack Trace#############" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "=================================Stack Trace=========================" << std::endl;
     for (size_t i=0; i < size; i++) {
         std::cerr << strings[i] << std::endl;
     }
     free(strings);
-    std::cerr << "##############Stack Trace#############" << std::endl;
+    std::cerr << "=====================================================================" << std::endl;
     throw std::runtime_error("");
 }
 #endif
