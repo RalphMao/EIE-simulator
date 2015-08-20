@@ -20,7 +20,7 @@ NzeroFetch::NzeroFetch() : BaseModule() {
 
     }
 
-    pack_addr = 0;
+    pack_addr_p = 0;
     reg_addr = 0;
 
     memset(acts_per_bank, 0, NUM_PE * sizeof(Register));
