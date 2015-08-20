@@ -49,14 +49,32 @@ class ActRW : public BaseModule {
     ActRW();
     ~ActRW();
     void init(char* datafile);
+    void set_state(int state_t, int end_addr_t, int which_t);
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
     virtual inline ModuleType name() { return ActRW_k;}
 
-    Register reg_addr;
+    Memory ACTmem[2];
+
+    // To NzeroFetch
+    Register read_addr_reg, end_addr_reg;
+    Register which, internal_state, state;
     Wire reg_addr_w;
-    Wire acts_per_bank[NUM_PE];
+    Wire read_addr_reg_D, internal_state_D;
+    Wire acts_read_data[NUM_PE], acts_per_bank[NUM_PE];
+    SharedWire next_reg_addr;
+
+    // To Arithmetic module
+    Register read_addr_arithm[NUM_PE], write_addr_arithm[NUM_PE], 
+        write_data_arithm[NUM_PE], write_enable[NUM_PE];
+    Wire read_data_arithm[NUM_PE];
+    Wire write_complete, layer_complete;
+    SharedWire read_addr_arithm_D[NUM_PE], write_addr_arithm_D[NUM_PE], 
+        write_data_arithm_D[NUM_PE], write_enable_D[NUM_PE];
+
+    int bank_size;
+
 };
 
 
@@ -89,39 +107,6 @@ class NzeroFetch : public BaseModule {
 
 };
 
-class SpMatRead : public BaseModule {
-    public:
-    SpMatRead(int id);
-    virtual ~SpMatRead();
-    void init(char *datafile);
-    virtual void propagate();
-    virtual void update();
-    virtual void connect(BaseModule *dependency);
-    virtual inline ModuleType name() { return SpMatRead_k;}
-
-    Register start_addr, end_addr, valid, value;
-    Register start_addr_nextline, current_addr_shift;
-    Register patch_complete_p, line_complete_p;
-    Register memory_addr_shift_p;
-
-    Wire index, code, valid_next;
-    Wire start_addr_nextline_D, current_addr_shift_D;
-    Wire patch_complete, line_complete, line_last, shift_equal;
-    Wire memory_addr, memory_shift;
-    Wire addr, addr_residue;
-    Wire memory_addr_shift;
-    Wire *data_read;
-    Wire read;
-
-    SharedWire start_addr_D, end_addr_D, valid_D, value_D;
-
-    Memory WImem;
-
-    int unit_line, num_lines;
-    int index_bits, weights_bits;
-
-};
-
 class PtrRead : public BaseModule {
     public:
     PtrRead(int id); 
@@ -140,6 +125,67 @@ class PtrRead : public BaseModule {
     Memory PTRmem;
     
     int num_lines;
+};
+
+class SpMatRead : public BaseModule {
+    public:
+    SpMatRead(int id);
+    virtual ~SpMatRead();
+    void init(char *datafile);
+    virtual void propagate();
+    virtual void update();
+    virtual void connect(BaseModule *dependency);
+    virtual inline ModuleType name() { return SpMatRead_k;}
+
+    Register start_addr, end_addr, valid, value;
+    Register start_addr_nextline, current_addr_shift;
+    Register patch_complete_p, line_complete_p;
+    Register memory_addr_shift_p;
+
+    Wire index, code, valid_next, value_next;
+    Wire start_addr_nextline_D, current_addr_shift_D;
+    Wire patch_complete, line_complete, line_last, shift_equal;
+    Wire memory_addr, memory_shift;
+    Wire addr, addr_residue;
+    Wire memory_addr_shift;
+    Wire *data_read;
+    Wire read;
+
+    SharedWire start_addr_D, end_addr_D, valid_D, value_D;
+
+    Memory WImem;
+
+    int unit_line, num_lines;
+    int index_bits, weights_bits;
+
+};
+
+class ArithmUnit : public BaseModule {
+    public:
+    ArithmUnit(int id);
+    virtual ~ArithmUnit() {}
+    void init(char *datafile);
+    virtual void propagate();
+    virtual void update();
+    virtual void connect(BaseModule *dependency);
+    virtual inline ModuleType name() { return Arithm_k;}
+
+    Register patch_complete, index, value_code, act_value, valid;
+    Register read_addr_last;
+    Register read_addr_p, value_decode, act_value_p, valid_p, read_data;
+    Register read_addr_p_p, result_muladd_p, valid_p_p;
+
+    Wire read_addr, value_decode_D, read_addr_last_D;
+    Wire value_to_add, result_muladd;
+    Wire bypass;
+    Wire write_enable, write_addr, write_data;
+
+    SharedWire patch_complete_D, index_D, value_code_D, act_value_D, valid_D;
+    SharedWire read_data_D;
+
+    static int32_t codebook[ARITHM_codebooksize];
+    static bool initialized; 
+    int codebook_size;
 };
 
 #endif

@@ -82,6 +82,8 @@ void SpMatRead::propagate() {
     index = data_read[memory_shift * 2];
     code = data_read[memory_shift * 2 + 1];
 
+    value_next = value;
+
     valid_next = valid && (memory_addr_shift_p != memory_addr_shift);
 
     // Decision
