@@ -2,9 +2,9 @@
 #ifndef CONFIGS
 #define CONFIGS
 
-const int NUM_PE = 2;
+const int NUM_PE = 4;
 
-const int NZFETCH_buffersize = 4;
+const int NZFETCH_buffersize = 2;
 
 const int PTRVEC_num_lines = 10;
 

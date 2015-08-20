@@ -11,15 +11,22 @@ typedef int32_t* Memory;
 typedef const int32_t* SharedWire;
 
 enum ModuleType {
-    Base_k,
-    ActRW_k,
+    ActRW_k = 0,
     NzeroFetch_k,
     PtrRead_k,
     SpMatRead_k,
-    IndAccumulate_k,
-    WDecode_k,
-    AddMulUnit_k,
-    Control_k
+    Arithm_k,
+    // WDecode_k,
+    // AddMulUnit_k,
+    Control_k,
+    Base_k
+};
+const int TYPES = Base_k;
+
+enum ConnectType {
+    NoConnect = 0,
+    Connect_by_id,
+    Connect_all
 };
 
 class BaseModule {
@@ -36,6 +43,23 @@ class BaseModule {
     int module_id;
 };
 
+class ActRW : public BaseModule {
+    public:
+
+    ActRW();
+    ~ActRW();
+    void init(char* datafile);
+    virtual void propagate();
+    virtual void update();
+    virtual void connect(BaseModule *dependency);
+    virtual inline ModuleType name() { return ActRW_k;}
+
+    Register reg_addr;
+    Wire reg_addr_w;
+    Wire acts_per_bank[NUM_PE];
+};
+
+
 class NzeroFetch : public BaseModule {
     public:
     NzeroFetch();
@@ -45,14 +69,24 @@ class NzeroFetch : public BaseModule {
     virtual void connect(BaseModule *dependency);
     virtual inline ModuleType name() { return NzeroFetch_k;}
 
-    Register pack_addr, pack_shift;
+    // Nonzero find
+    Register pack_addr_p;
+    Register reg_addr, acts_per_bank[NUM_PE];
+    Wire one_full, find, write_enable;
+    Wire pack_addr, next_shift, next_reg_addr;
+    Wire value_buffer, index_buffer;
+    SharedWire reg_addr_D, acts_per_bank_D[NUM_PE];
+
+    // FIFO part
     Register pos_read[NUM_PE], pos_write[NUM_PE];
     Register act_index[NUM_PE][NZFETCH_buffersize], value[NUM_PE][NZFETCH_buffersize];
-
     Wire act_index_output[NUM_PE], value_output[NUM_PE];
     Wire empty[NUM_PE], full[NUM_PE];
+    Wire pos_read_D[NUM_PE], pos_write_D[NUM_PE];
+    SharedWire read_sp[NUM_PE], valid_ptr[NUM_PE];
 
-    SharedWire patch_complete[NUM_PE], valid_ptr[NUM_PE];
+    int buffer_size;
+
 };
 
 class SpMatRead : public BaseModule {

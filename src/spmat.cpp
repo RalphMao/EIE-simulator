@@ -13,6 +13,14 @@ SpMatRead::SpMatRead(int id):BaseModule(id){
     int memory_size = unit_line * num_lines * sizeof(int32_t) * 2;
     WImem = static_cast<Memory>(new int32_t[memory_size]);
     data_read = static_cast<Wire*>(new int32_t[unit_line * 2]);
+
+    start_addr = 0;
+    end_addr = 0;
+    valid = 0;
+    start_addr_nextline = 0;
+    current_addr_shift = 0;
+    patch_complete_p = 1;
+    line_complete_p = 1;
 }
 
 SpMatRead::~SpMatRead() {
@@ -34,13 +42,6 @@ void SpMatRead::init(char *datafile) {
     else {
         LOG_ERROR("Unable to open the file!");
     }
-    start_addr = 0;
-    end_addr = 0;
-    valid = 0;
-    start_addr_nextline = 0;
-    current_addr_shift = 0;
-    patch_complete_p = 1;
-    line_complete_p = 1;
 }
 
 void SpMatRead::connect(BaseModule *dependency) {

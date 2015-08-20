@@ -9,6 +9,10 @@ PtrRead::PtrRead(int id) :BaseModule(id) {
 
     int memory_size = num_lines * sizeof(int32_t);
     PTRmem = static_cast<Memory>(new int32_t[memory_size]);
+
+    act_index = 0;
+    value = 0;
+    empty = 1;
 }
 
 PtrRead::~PtrRead(){
@@ -28,9 +32,6 @@ void PtrRead::init(char *datafile) {
     else {
         LOG_ERROR("Unable to open the file!");
     }
-    act_index = 0;
-    value = 0;
-    empty = 1;
 
 }
 

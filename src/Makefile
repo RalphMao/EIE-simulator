@@ -1,5 +1,5 @@
 
-CXX=g++
+CXX=clang++
 FLAGS=-Wall -O2 -g 
 TEST_FLAGS=-Wall -g 
 LINK_FLAGS=-rdynamic
@@ -15,6 +15,10 @@ TEST_EXE=test
 
 # all: $(O_FILES)
     
+test_nzf: $(H_FILES) spmat.cpp ptrvec.cpp nzfetch.cpp test_nzfetch.cpp
+	$(CXX) -c spmat.cpp ptrvec.cpp nzfetch.cpp test_nzfetch.cpp $(TEST_FLAGS)
+	$(CXX) -o $(TEST_EXE) spmat.o test_nzfetch.o nzfetch.o ptrvec.o $(LINK_FLAGS)
+
 test_ptrvec: $(H_FILES) spmat.cpp ptrvec.cpp test_ptrvec.cpp
 	$(CXX) -c test_ptrvec.cpp spmat.cpp ptrvec.cpp $(TEST_FLAGS)
 	$(CXX) -o $(TEST_EXE) spmat.o test_ptrvec.o ptrvec.o $(LINK_FLAGS)
