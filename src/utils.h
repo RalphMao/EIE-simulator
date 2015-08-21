@@ -7,6 +7,8 @@
 #include<stdexcept>
 #include<execinfo.h>
 #include<stdlib.h>
+#include"configs.h"
+
 
 #ifndef DEBUG
 #define DEBUG 0

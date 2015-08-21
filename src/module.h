@@ -10,25 +10,6 @@ typedef int32_t Wire;
 typedef int32_t* Memory;
 typedef const int32_t* SharedWire;
 
-enum ModuleType {
-    ActRW_k = 0,
-    NzeroFetch_k,
-    PtrRead_k,
-    SpMatRead_k,
-    Arithm_k,
-    // WDecode_k,
-    // AddMulUnit_k,
-    Control_k,
-    Base_k
-};
-const int TYPES = Base_k;
-
-enum ConnectType {
-    NoConnect = 0,
-    Connect_by_id,
-    Connect_all
-};
-
 class BaseModule {
     public:
     
@@ -104,6 +85,9 @@ class NzeroFetch : public BaseModule {
     SharedWire read_sp[NUM_PE], valid_ptr[NUM_PE];
 
     int buffer_size;
+#if DEBUG == 1
+    int full_idx;
+#endif
 
 };
 

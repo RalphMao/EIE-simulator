@@ -39,6 +39,10 @@ void NzeroFetch::propagate() {
 
         value_output[i] = value[i][pos_read[i]];
         act_index_output[i] = act_index[i][pos_read[i]];
+
+#if DEBUG == 1
+        if (full[i]) full_idx = i;
+#endif
     }
 
     // Shortcut for arithmetic logics
