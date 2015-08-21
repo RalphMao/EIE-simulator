@@ -5,15 +5,19 @@
 #include<iostream> 
 
 bool ArithmUnit::initialized;
-int32_t ArithmUnit::codebook[ARITHM_codebooksize];
+uint32_t ArithmUnit::codebook[ARITHM_codebooksize];
 
 ArithmUnit::ArithmUnit(int id) : BaseModule(id) {
     codebook_size = ARITHM_codebooksize;
 
     valid = 0;
+    index = 0;
+    value_code = 0;
+    act_value = 0;
+    patch_complete = 0;
+
     valid_p = 0;
     valid_p_p = 0;
-    patch_complete = 0;
     read_addr_last = 0;
 
     initialized = false;
@@ -41,18 +45,21 @@ void ArithmUnit::propagate() {
     // Stage 1
     read_addr = index + read_addr_last;
     read_addr_last_D = (patch_complete)?0:read_addr;
-
+    valid_w = valid;
     value_decode_D = codebook[value_code];
     
     // Stage 2
     bypass = valid_p_p && (read_addr_p == read_addr_p_p);
-    result_muladd = static_cast<float>(value_decode) * static_cast<float>(act_value_p) +
-        static_cast<float>(bypass?result_muladd_p:read_data);
+    *(reinterpret_cast<float*>(&result_muladd)) = *(reinterpret_cast<float*>(&value_decode)) * 
+        *(reinterpret_cast<float*>(&act_value_p)) +
+        ((bypass)? *(reinterpret_cast<float*>(&result_muladd_p)) : *(reinterpret_cast<float*>(&read_data)));
 
     write_enable = valid_p;
     write_addr = read_addr_p;
     write_data = result_muladd;
 
+    read_addr_p_w = read_addr_p;
+    valid_p_w = valid_p;
     // Stage 3
     /// None
 
@@ -67,18 +74,20 @@ void ArithmUnit::update() {
     valid = *valid_D;
 
     // Stage 2
+    if (valid_w) {
+        read_addr_last = read_addr_last_D;
+    }
     value_decode = value_decode_D;
-    read_addr_last = read_addr_last_D;
     read_addr_p = read_addr;
     value_decode = value_decode_D;
     act_value_p = act_value;
-    valid_p = valid;
+    valid_p = valid_w;
     read_data = *read_data_D;
 
     // Stage 3
-    read_addr_p_p = read_addr_p;
+    read_addr_p_p = read_addr_p_w;
     result_muladd_p = result_muladd;
-    valid_p_p = valid_p;
+    valid_p_p = valid_p_w;
 }
 
 void ArithmUnit::connect(BaseModule *dependency) {

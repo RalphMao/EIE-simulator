@@ -19,12 +19,12 @@
 
 #define LOG_ERROR(x) MessageError(__func__, __FILE__, __LINE__, (x))
 
-#define P_V(x) std::cout << #x ": " << x << std::endl
+#define P_V(x) std::cerr << #x ": " << x << std::endl
 
 inline void Message(const char *func, const char *file, int line, std::string x) {
-    std::cout << "================================================" << std::endl;
-    std::cout << "LOG:      #call from " << func << "(): " << file << ':' << line << "#" << std::endl;
-    std::cout << ">>> " << x << std::endl;
+    std::cerr << "================================================" << std::endl;
+    std::cerr << "LOG:      #call from " << func << "(): " << file << ':' << line << "#" << std::endl;
+    std::cerr << ">>> " << x << std::endl;
 }
 
 inline void MessageError(const char *func, const char *file, int line, std::string x) {

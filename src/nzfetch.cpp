@@ -12,6 +12,7 @@ NzeroFetch::NzeroFetch() : BaseModule() {
 
     // Initialization
     for (int i = 0; i < NUM_PE; i++) {
+        acts_per_bank[i] = 0;
         pos_read[i] = 0;
         pos_write[i] = 0;
 

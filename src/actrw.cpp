@@ -22,8 +22,8 @@ ActRW::ActRW() : BaseModule() {
     bank_size = (ACTRW_maxcapacity-1) / NUM_PE + 1;
 
     int memory_size = bank_size * NUM_PE * sizeof(int32_t);
-    ACTmem[0] = static_cast<Memory>(new int32_t[memory_size]);
-    ACTmem[1] = static_cast<Memory>(new int32_t[memory_size]);
+    ACTmem[0] = static_cast<Memory>(new uint32_t[memory_size]);
+    ACTmem[1] = static_cast<Memory>(new uint32_t[memory_size]);
 
     which = 0;
     internal_state = 0;

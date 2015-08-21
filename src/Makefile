@@ -28,6 +28,10 @@ test_spmat: $(H_FILES) spmat.cpp test_spmat.cpp
 	$(CXX) -c test_spmat.cpp spmat.cpp $(TEST_FLAGS)
 	$(CXX) -o $(TEST_EXE) spmat.o test_spmat.o $(LINK_FLAGS)
 
+test_arithm: $(H_FILES) arithm.cpp test_arithm.cpp
+	$(CXX) -c arithm.cpp test_arithm.cpp $(TEST_FLAGS)
+	$(CXX) -o $(TEST_EXE) arithm.o test_arithm.o $(LINK_FLAGS)
+
 $(O_FILES): $(C_FILES) $(H_FILES)
 	$(CXX) -c $(C_FILES) $(TEST_FLAGS)
 

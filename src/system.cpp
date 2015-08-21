@@ -23,6 +23,11 @@ class System {
 };
 
 #if DEBUG == 1
+template class std::vector<ActRW*>;
+template class std::vector<NzeroFetch*>;
+template class std::vector<PtrRead*>;
+template class std::vector<SpMatRead*>;
+template class std::vector<ArithmUnit*>;
 vector<ActRW*> act;
 vector<NzeroFetch*> nzf;
 vector<PtrRead*> ptr;

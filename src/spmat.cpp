@@ -11,8 +11,8 @@ SpMatRead::SpMatRead(int id):BaseModule(id){
     weights_bits = SPMAT_weights_bits;
 
     int memory_size = unit_line * num_lines * sizeof(int32_t) * 2;
-    WImem = static_cast<Memory>(new int32_t[memory_size]);
-    data_read = static_cast<Wire*>(new int32_t[unit_line * 2]);
+    WImem = static_cast<Memory>(new uint32_t[memory_size]);
+    data_read = static_cast<Wire*>(new uint32_t[unit_line * 2]);
 
     start_addr = 0;
     end_addr = 0;

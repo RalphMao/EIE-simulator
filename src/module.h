@@ -5,10 +5,10 @@
 #include<stdint.h>
 #include"configs.h"
 
-typedef int32_t Register;
-typedef int32_t Wire;
-typedef int32_t* Memory;
-typedef const int32_t* SharedWire;
+typedef uint32_t Register;
+typedef uint32_t Wire;
+typedef uint32_t* Memory;
+typedef const uint32_t* SharedWire;
 
 class BaseModule {
     public:
@@ -40,7 +40,8 @@ class ActRW : public BaseModule {
 
     // To NzeroFetch
     Register read_addr_reg, end_addr_reg;
-    Register which, internal_state, state;
+    Register which, internal_state;
+    Register state; // Not used so far
     Wire reg_addr_w;
     Wire read_addr_reg_D, internal_state_D;
     Wire acts_read_data[NUM_PE], acts_per_bank[NUM_PE];
@@ -163,11 +164,12 @@ class ArithmUnit : public BaseModule {
     Wire value_to_add, result_muladd;
     Wire bypass;
     Wire write_enable, write_addr, write_data;
+    Wire valid_w, valid_p_w, read_addr_p_w;
 
     SharedWire patch_complete_D, index_D, value_code_D, act_value_D, valid_D;
     SharedWire read_data_D;
 
-    static int32_t codebook[ARITHM_codebooksize];
+    static uint32_t codebook[ARITHM_codebooksize];
     static bool initialized; 
     int codebook_size;
 };
