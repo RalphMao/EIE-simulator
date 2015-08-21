@@ -22,6 +22,7 @@
 #define P_V(x) std::cout << #x ": " << x << std::endl
 
 inline void Message(const char *func, const char *file, int line, std::string x) {
+    std::cout << "================================================" << std::endl;
     std::cout << "LOG:      #call from " << func << "(): " << file << ':' << line << "#" << std::endl;
     std::cout << ">>> " << x << std::endl;
 }
@@ -35,7 +36,7 @@ inline void MessageError(const char *func, const char *file, int line, std::stri
     char **strings = backtrace_symbols(array, size);
     std::cerr << std::endl;
     std::cerr << "=================================Stack Trace=========================" << std::endl;
-    for (size_t i=0; i < size; i++) {
+    for (size_t i=1; i < size; i++) {
         std::cerr << strings[i] << std::endl;
     }
     free(strings);

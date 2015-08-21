@@ -60,7 +60,7 @@ const char datafile[TYPES][MAX_FILELENGTH] = {
     "",
     "ptr/ptr",
     "spm/spm",
-    "",
-}
+    "arithm",
+};
 
 #endif

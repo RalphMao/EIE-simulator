@@ -50,7 +50,7 @@ void ActRW::set_state(int state_t, int end_addr_t, int which_t) {
     which = which_t;
 }
 
-void ActRW::init(char* datafile) {
+void ActRW::init(const char* datafile) {
     using namespace std;                                                
     ifstream file(datafile, ios::in|ios::binary);                       
     int memory_size = bank_size * NUM_PE * sizeof(int32_t);

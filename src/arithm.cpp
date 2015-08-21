@@ -4,6 +4,9 @@
 #include<fstream>  
 #include<iostream> 
 
+bool ArithmUnit::initialized;
+int32_t ArithmUnit::codebook[ARITHM_codebooksize];
+
 ArithmUnit::ArithmUnit(int id) : BaseModule(id) {
     codebook_size = ARITHM_codebooksize;
 
@@ -16,7 +19,7 @@ ArithmUnit::ArithmUnit(int id) : BaseModule(id) {
     initialized = false;
 }
 
-void ArithmUnit::init(char* datafile) {
+void ArithmUnit::init(const char* datafile) {
     using namespace std;                                               
     if (!initialized) {
         ifstream file(datafile, ios::in|ios::binary);                      

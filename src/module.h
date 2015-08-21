@@ -29,7 +29,7 @@ class ActRW : public BaseModule {
 
     ActRW();
     ~ActRW();
-    void init(char* datafile);
+    void init(const char* datafile);
     void set_state(int state_t, int end_addr_t, int which_t);
     virtual void propagate();
     virtual void update();
@@ -95,7 +95,7 @@ class PtrRead : public BaseModule {
     public:
     PtrRead(int id); 
     virtual ~PtrRead();
-    void init(char *datafile);
+    void init(const char *datafile);
     virtual inline ModuleType name() { return PtrRead_k;}
     virtual void propagate();
     virtual void update();
@@ -115,7 +115,7 @@ class SpMatRead : public BaseModule {
     public:
     SpMatRead(int id);
     virtual ~SpMatRead();
-    void init(char *datafile);
+    void init(const char *datafile);
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
@@ -148,7 +148,7 @@ class ArithmUnit : public BaseModule {
     public:
     ArithmUnit(int id);
     virtual ~ArithmUnit() {}
-    void init(char *datafile);
+    void init(const char *datafile);
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);

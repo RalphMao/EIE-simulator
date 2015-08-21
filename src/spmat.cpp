@@ -28,7 +28,7 @@ SpMatRead::~SpMatRead() {
     delete[] data_read;
 }
 
-void SpMatRead::init(char *datafile) {
+void SpMatRead::init(const char *datafile) {
     using namespace std;
     ifstream file(datafile, ios::in|ios::binary);
     if (file.is_open()) {

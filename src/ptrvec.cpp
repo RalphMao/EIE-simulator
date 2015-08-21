@@ -18,7 +18,7 @@ PtrRead::PtrRead(int id) :BaseModule(id) {
 PtrRead::~PtrRead(){
     delete[] PTRmem;
 }
-void PtrRead::init(char *datafile) {
+void PtrRead::init(const char *datafile) {
     using namespace std;
     ifstream file(datafile, ios::in|ios::binary);
     if (file.is_open()) {
