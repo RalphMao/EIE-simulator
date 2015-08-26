@@ -176,6 +176,9 @@ void System::output(const char* output_file) {
 
 int main() {
     System system;
+    ActRW *ControlUnit = static_cast<ActRW*>(system.modules[0]);
+    ControlUnit->set_state(1, 1+(ACTRW_maxcapacity-1) / NUM_PE, 0);
+
     LOG("System initialization done");
     while (!system.done()) {
         system.tic();
