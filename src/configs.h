@@ -2,23 +2,9 @@
 #ifndef CONFIGS
 #define CONFIGS
 
+#include"params.h"
+
 #define DEBUG 1
-
-const int NUM_PE = 4;
-
-const int ACTRW_maxcapacity = 800;
-
-const int NZFETCH_buffersize = 4;
-
-const int PTRVEC_num_lines = 1000;
-
-const int SPMAT_unit_line   =  8;
-const int SPMAT_num_lines   =  25;
-const int SPMAT_index_bits  =  4;
-const int SPMAT_weights_bits=  4;
-
-const int ARITHM_codebooksize = 16;
-
 enum ModuleType {
     ActRW_k = 0,
     NzeroFetch_k,

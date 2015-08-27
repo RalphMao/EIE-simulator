@@ -159,7 +159,6 @@ class ArithmUnit : public BaseModule {
     Register patch_complete, index, value_code, act_value, valid;
     Register read_addr_last;
     Register read_addr_p, value_decode, act_value_p, valid_p, read_data;
-    Register read_addr_p_p, result_muladd_p, valid_p_p;
 
     Wire read_addr, value_decode_D, read_addr_last_D;
     Wire value_to_add, result_muladd;

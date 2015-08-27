@@ -1,12 +1,11 @@
 
-CXX=clang++
-FLAGS=-Wall -O2 -g -std=c++11
-TEST_FLAGS=-Wall -g -std=c++11
+CXX=g++
+TEST_FLAGS=-Wall -g -std=c++11 -O0 -Wuninitialized -Wfatal-errors
 LINK_FLAGS=-rdynamic
 
 O_FILES=spmat.o ptrvec.o arithm.o nzfetch.o actrw.o system.o
 C_FILES=spmat.cpp ptrvec.cpp arithm.cpp actrw.cpp nzfetch.cpp system.cpp
-H_FILES=module.h configs.h 
+H_FILES=*.h
 EXE=simulation
 
 TEST_C_FILES=test_spmat.cpp

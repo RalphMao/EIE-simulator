@@ -44,16 +44,15 @@ ActRW::~ActRW() {
     delete[] ACTmem[1];
 }
 
-void ActRW::set_state(int state_t, int input_size, int which_t) {
+void ActRW::set_state(int state_t, int input_size_t, int which_t) {
     state = state_t;
     which = which_t;
 
-    if (end_addr_t > ACTRW_maxcapacity) {
+    if (input_size_t > ACTRW_maxcapacity) {
         LOG_ERROR("End address exceeds memory capacity!");
     }
-    input_size = end_addr_t;
-    end_addr_reg = (end_addr_t-1) / NUM_PE;
-
+    input_size = input_size_t;
+    end_addr_reg = (input_size-1) / NUM_PE;
 }
 
 void ActRW::init(const char* datafile) {
@@ -129,10 +128,9 @@ void ActRW::update() {
 
     // Of Arithmetic modules
     for (int i = 0; i < NUM_PE; i++) {
-        if (write_enable[i]) {
+        if (*(write_enable_D[i])) {
             ACTmem[arithm_id][write_addr_arithm[i] * bank_size] = write_data_arithm[i];
         }
-        write_enable[i] = *(write_enable_D[i]);
         write_addr_arithm[i] = *(write_addr_arithm_D[i]);
         write_data_arithm[i] = *(write_data_arithm_D[i]);
     }

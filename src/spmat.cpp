@@ -17,10 +17,14 @@ SpMatRead::SpMatRead(int id):BaseModule(id){
     start_addr = 0;
     end_addr = 0;
     valid = 0;
+    value = 0;
+
     start_addr_nextline = 0;
     current_addr_shift = 0;
     patch_complete_p = 1;
     line_complete_p = 1;
+
+    memory_addr_shift_p = 0;
 }
 
 SpMatRead::~SpMatRead() {
@@ -31,10 +35,16 @@ SpMatRead::~SpMatRead() {
 void SpMatRead::init(const char *datafile) {
     using namespace std;
     ifstream file(datafile, ios::in|ios::binary);
+    ifstream file_test(datafile, ios::in|ios::binary|ios::ate);
     if (file.is_open()) {
         int memory_size = unit_line * num_lines * sizeof(int32_t) * 2;
+        int file_size = static_cast<int>(file_test.tellg());
 
-        if (!file.read(reinterpret_cast<char*>(WImem), memory_size)) {
+        if (file_size > memory_size) {
+            LOG_ERROR("File size exceeds memory limit!");
+        }
+
+        if (!file.read(reinterpret_cast<char*>(WImem), file_size)) {
             LOG_ERROR("File size does not match!");
         }
         file.close();
@@ -79,8 +89,8 @@ void SpMatRead::propagate() {
             data_read[i+1] = WImem[memory_addr * unit_line * 2 + i+1];
         }
     }
-    index = data_read[memory_shift * 2];
-    code = data_read[memory_shift * 2 + 1];
+    code= data_read[memory_shift * 2];
+    index = data_read[memory_shift * 2 + 1];
 
     value_next = value;
 
@@ -89,7 +99,7 @@ void SpMatRead::propagate() {
     // Decision
     line_last = memory_addr == (end_addr / unit_line);
     shift_equal = memory_shift == (end_addr % unit_line);
-    line_complete = (line_last)?shift_equal : (memory_shift == (unit_line - 1));
+    line_complete = (line_last)?shift_equal : ((memory_shift+1) == static_cast<uint32_t>(unit_line));
     patch_complete = line_last && shift_equal;
 
     read = patch_complete || !valid;
