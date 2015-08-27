@@ -44,7 +44,7 @@ class ActRW : public BaseModule {
     Register state; // Not used so far
     Wire reg_addr_w;
     Wire read_addr_reg_D, internal_state_D;
-    Wire acts_read_data[NUM_PE], acts_per_bank[NUM_PE];
+    Wire acts_per_bank[NUM_PE];
     SharedWire next_reg_addr;
 
     // To Arithmetic module
@@ -56,6 +56,7 @@ class ActRW : public BaseModule {
         write_data_arithm_D[NUM_PE], write_enable_D[NUM_PE];
 
     int bank_size;
+    int input_size;
 
 };
 

@@ -70,51 +70,95 @@ def get_codes(net, codebook):
 def get_csc(codes_W, codes_b, bank_num=64, max_jump = 16):
     layers = codes_W.keys()
     ptr = [np.array([0], dtype = np.int32)] * bank_num
-    spm = [np.array([0], dtype = np.int32)] * bank_num
+    spm = [np.array([], dtype = np.int32)] * bank_num
+    ind= [np.array([], dtype = np.int32)] * bank_num
+    layer_shift = np.zeros(len(layers) + 1, dtype=np.int32)
 
-    for layer in layers:
+    has_bias = [False] * bank_num
+
+    for layer_id, layer in enumerate(layers):
         weights = codes_W[layer]
         bias = codes_b[layer]
 
         for idx in range(bank_num):
             tmp = np.take(weights, range(idx, weights.shape[0], bank_num), axis=0)
+            tmp_bias = np.take(bias, range(idx, bias.shape[0], bank_num), axis=0)
             # bank_weights[idx,:tmp.shape[0]] = tmp
             # tmp_id = np.where(tmp == 0)
             # x_id = tmp_id[0]
             # y_id = tmp_id[1]
-            num_nonzero_col = np.sum(tmp != 0, axis = 0)
-            ptr_tmp = np.zeros(((tmp.shape[1]-1)/bank_num+1)*bank_num+1, dtype = np.int32) # take bias into consideration
+            if not has_bias[idx]:
+                ptr_tmp = np.zeros(((tmp.shape[1]-1)/bank_num+1)*bank_num+2, dtype = np.int32) # take bias into consideration
+                has_bias[idx] = True
+            else:
+                ptr_tmp = np.zeros(((tmp.shape[1])/bank_num+1)*bank_num+2, dtype = np.int32) # take bias into consideration
+                
             spm_tmp = np.zeros(weights.size, dtype = np.int32) # large enough
+            ind_tmp = np.ones(weights.size, dtype = np.int32) * (max_jump-1)# large enough
             for col in range(tmp.shape[1]):
-                loc = np.where(tmp[col] != 0)
-                distance_loc = np.append(loc[0], np.diff(loc))
-                zeros = distance_loc / max_jump
-                idx = np.cumsum(zeros+1)-1
-                ptr_tmp[col+1] = num_nonzero_col[col] + idx[-1]+1 + ptr_tmp[col]
-                spm_tmp[ptr_tmp[col] + idx] = tmp[col][loc]
-
+                loc = np.where(tmp[:,col] != 0)[0]
+                if len(loc) > 0:
+                    distance_loc = np.append(loc[0], np.diff(loc))
+                    zeros = distance_loc / max_jump
+                    idx_vec = np.cumsum(zeros+1)-1
+                    ptr_tmp[col+1] = idx_vec[-1]+1 + ptr_tmp[col]
+                    spm_tmp[ptr_tmp[col] + idx_vec] = tmp[loc, col]
+                    ind_tmp[ptr_tmp[col] + idx_vec] = distance_loc % 16
+                else:
+                    ptr_tmp[col+1] = ptr_tmp[col]
             
             ptr_tmp[tmp.shape[1]:-1] = ptr_tmp[tmp.shape[1]]
 
-            loc = np.where(bias != 0)
-            distance_loc = np.append(loc[0], np.diff(loc))
-            zeros = distance_loc / max_jump
-            idx = np.cumsum(zeros+1)-1
-            ptr_tmp[-1] = num_nonzero_col[col] + idx[-1]+1 + ptr_tmp[-2]
-            spm_tmp[ptr_tmp[-2] + idx] = bias[loc]
+            loc = np.where(tmp_bias != 0)[0]
+            if len(loc) > 0:
+                distance_loc = np.append(loc[0], np.diff(loc))
+                zeros = distance_loc / max_jump
+                idx_vec = np.cumsum(zeros+1)-1
+                ptr_tmp[-1] = idx_vec[-1]+1 + ptr_tmp[-2]
+                spm_tmp[ptr_tmp[-2] + idx_vec] = tmp_bias[loc]
+                ind_tmp[ptr_tmp[-2] + idx_vec] = distance_loc % 16
+            else:
+                ptr_tmp[-1] = ptr_tmp[-2]
 
             ptr[idx] = np.append(ptr[idx], ptr_tmp[1:] + ptr[idx][-1])
-            spm[idx] = np.append(spm[idx], spm_tmp[:ptr_tmp[col+1]])
+            spm[idx] = np.append(spm[idx], spm_tmp[:ptr_tmp[-1]])
+            ind[idx] = np.append(ind[idx], ind_tmp[:ptr_tmp[-1]])
 
-    return ptr, spm
-                
+            print len(ptr[idx])
+        layer_shift[layer_id+1] = ptr[0].size - 1
 
 
-    
+    return ptr, spm, ind, layer_shift[:-1]
+
 
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
-layers = ['ip2']
+if option == 'lenet5':
+    layers = ['ip1']
+    bank_num = 4
+else:
+    layers = ['fc6']
+    bank_num = 32
+
 codebook = kmeans(net, layers)
 codes_W, codes_b = get_codes(net, codebook)
-ptr, spm = get_csc(codes_W, codes_b)
+ptr, spm, ind, layer_shift= get_csc(codes_W, codes_b, bank_num = bank_num)
+
+simulator_root = os.environ['SIMULATOR_PATH']
+os.system("rm -rf %s/data/ptr"%simulator_root)
+os.system("rm -rf %s/data/spm"%simulator_root)
+os.system("mkdir %s/data/ptr"%simulator_root)
+os.system("mkdir %s/data/spm"%simulator_root)
+
+for idx in range(bank_num):
+    with open("%s/data/ptr/ptr%d.dat"%(simulator_root, idx), 'wb') as f:
+        ptr[idx].tofile(f)
+
+    with open("%s/data/spm/spm%d.dat"%(simulator_root, idx), 'wb') as f:
+        mem = np.transpose(np.array([spm[idx],ind[idx]])).flatten()
+        mem.tofile(f)
+
+with open("%s/data/arithm.dat"%simulator_root, 'wb') as f:
+    for key in codebook:
+        codebook[key].tofile(f)
+    
 

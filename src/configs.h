@@ -6,11 +6,11 @@
 
 const int NUM_PE = 4;
 
-const int ACTRW_maxcapacity = 16;
+const int ACTRW_maxcapacity = 800;
 
-const int NZFETCH_buffersize = 2;
+const int NZFETCH_buffersize = 4;
 
-const int PTRVEC_num_lines = 10;
+const int PTRVEC_num_lines = 1000;
 
 const int SPMAT_unit_line   =  8;
 const int SPMAT_num_lines   =  25;
@@ -47,11 +47,11 @@ enum ConnectType {
 };
 
 const int topology[TYPES][TYPES] = {
-    {0, 1, 0, 0, 1},
+    {0, 1, 0, 0, 2},
     {1, 0, 2, 2, 0},
-    {0, 1, 0, 1, 0},
+    {0, 2, 0, 1, 0},
     {0, 0, 1, 0, 0},
-    {1, 0, 0, 1, 0},
+    {2, 0, 0, 1, 0},
 };
 
 #define MAX_FILELENGTH 20

@@ -44,19 +44,27 @@ ActRW::~ActRW() {
     delete[] ACTmem[1];
 }
 
-void ActRW::set_state(int state_t, int end_addr_t, int which_t) {
+void ActRW::set_state(int state_t, int input_size, int which_t) {
     state = state_t;
-    end_addr_reg = end_addr_t;
     which = which_t;
+
+    if (end_addr_t > ACTRW_maxcapacity) {
+        LOG_ERROR("End address exceeds memory capacity!");
+    }
+    input_size = end_addr_t;
+    end_addr_reg = (end_addr_t-1) / NUM_PE;
+
 }
 
 void ActRW::init(const char* datafile) {
     using namespace std;                                                
     ifstream file(datafile, ios::in|ios::binary);                       
     int memory_size = bank_size * NUM_PE * sizeof(int32_t);
+    memset(ACTmem[0], 0, memory_size);
+    memset(ACTmem[1], 0, memory_size);
     if (file.is_open()) {                                               
                                                                         
-        if (!file.read(reinterpret_cast<char*>(ACTmem[which]), memory_size)) { 
+        if (!file.read(reinterpret_cast<char*>(ACTmem[which]), input_size)) { 
             LOG_ERROR("File size does not match!");                     
         }                                                               
         file.close();                                                   
@@ -64,7 +72,6 @@ void ActRW::init(const char* datafile) {
     else {                                                              
         LOG_ERROR("Unable to open the file!");                          
     }                                                                   
-    memset(ACTmem[1-which], 0, memory_size);
 }
 
 void ActRW::propagate() {

@@ -83,8 +83,12 @@ BaseModule *ModuleCreate(ModuleType type, int id) {
 void Init(BaseModule *module) {
     ModuleType type = module->name();
     int id = module->id();
-    string filename = datafile[type];
-    filename += to_string(id) + ".dat";
+    string filename = "data/";
+    filename += datafile[type];
+    if (type == PtrRead_k || type == SpMatRead_k) {
+        filename += to_string(id);
+    }
+    filename +=".dat";
 
     switch (type) {
         case ActRW_k:
@@ -130,12 +134,18 @@ System::System() {
     for (int i = 0; i < num_modules; i++) {
         for (int j = 0; j < num_modules; j++) {
             if (topology[modules[i]->name()][modules[j]->name()] == Connect_by_id) {
-                if (modules[i]->id() == modules[j]->name()) {
+                if (modules[i]->id() == modules[j]->id()) {
                     modules[i]->connect(modules[j]);
+                    if (modules[i]->name()==ActRW_k) {
+                        LOG_DEBUG(to_string(modules[i]->name()) +"_" + to_string(modules[i]->id()) + "->" + to_string(modules[j]->name()) + to_string(modules[j]->id()));
+                    }
                 }
             }
             else if (topology[modules[i]->name()][modules[j]->name()] == Connect_all) {
                 modules[i]->connect(modules[j]);
+                    if (modules[i]->name()==ActRW_k) {
+                        LOG_DEBUG(to_string(modules[i]->name()) +"_" + to_string(modules[i]->id()) + "->" + to_string(modules[j]->name()) + to_string(modules[j]->id()));
+                    }
             }
         }
     }
@@ -177,7 +187,7 @@ void System::output(const char* output_file) {
 int main() {
     System system;
     ActRW *ControlUnit = static_cast<ActRW*>(system.modules[0]);
-    ControlUnit->set_state(1, 1+(ACTRW_maxcapacity-1) / NUM_PE, 0);
+    ControlUnit->set_state(1, ACTRW_maxcapacity, 0);
 
     LOG("System initialization done");
     while (!system.done()) {

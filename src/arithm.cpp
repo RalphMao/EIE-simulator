@@ -44,14 +44,14 @@ void ArithmUnit::init(const char* datafile) {
 void ArithmUnit::propagate() {
     // Stage 1
     read_addr = index + read_addr_last;
-    read_addr_last_D = (patch_complete)?0:read_addr;
+    read_addr_last_D = (patch_complete)?0:(read_addr+1);
     valid_w = valid;
     value_decode_D = codebook[value_code];
     
     // Stage 2
     bypass = valid_p_p && (read_addr_p == read_addr_p_p);
-    *(reinterpret_cast<float*>(&result_muladd)) = *(reinterpret_cast<float*>(&value_decode)) * 
-        *(reinterpret_cast<float*>(&act_value_p)) +
+    *(reinterpret_cast<float*>(&result_muladd)) = 
+        *(reinterpret_cast<float*>(&value_decode)) * *(reinterpret_cast<float*>(&act_value_p)) +
         ((bypass)? *(reinterpret_cast<float*>(&result_muladd_p)) : *(reinterpret_cast<float*>(&read_data)));
 
     write_enable = valid_p;
