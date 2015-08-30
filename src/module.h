@@ -30,7 +30,7 @@ class ActRW : public BaseModule {
     ActRW();
     ~ActRW();
     void init(const char* datafile);
-    void set_state(int state_t, int end_addr_t, int which_t);
+    void set_state(int state_t, int end_addr_t, int which_t, int bias_t);
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
@@ -40,7 +40,7 @@ class ActRW : public BaseModule {
 
     // To NzeroFetch
     Register read_addr_reg, end_addr_reg;
-    Register which, internal_state;
+    Register which, internal_state, has_bias;
     Register state; // Not used so far
     Wire reg_addr_w;
     Wire read_addr_reg_D, internal_state_D;
@@ -104,7 +104,7 @@ class PtrRead : public BaseModule {
     virtual void connect(BaseModule *dependency);
 
     Register act_index, value, empty;
-    Wire start_addr, end_addr, valid;
+    Wire start_addr, end_addr, valid, value_w;
     Wire index_odd, index_even;
     SharedWire act_index_D, value_D, empty_D, read_sp;
 

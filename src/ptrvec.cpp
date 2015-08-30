@@ -48,6 +48,7 @@ void PtrRead::propagate() {
     }
 
     valid = !((index_even == index_odd) || (empty));
+    value_w = value;
 }
 
 void PtrRead::update() {

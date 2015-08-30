@@ -27,6 +27,7 @@ ActRW::ActRW() : BaseModule() {
 
     which = 0;
     internal_state = 0;
+    has_bias = 0;
     
     read_addr_reg = 0;
     end_addr_reg = 0;
@@ -44,9 +45,10 @@ ActRW::~ActRW() {
     delete[] ACTmem[1];
 }
 
-void ActRW::set_state(int state_t, int input_size_t, int which_t) {
+void ActRW::set_state(int state_t, int input_size_t, int which_t, int bias_t) {
     state = state_t;
     which = which_t;
+    has_bias = bias_t;
 
     if (input_size_t > ACTRW_maxcapacity) {
         LOG_ERROR("End address exceeds memory capacity!");
@@ -83,7 +85,8 @@ void ActRW::propagate() {
         }
         reg_addr_w = read_addr_reg;
         read_addr_reg_D = read_addr_reg + 1;
-        internal_state_D = (read_addr_reg == end_addr_reg)?Bias1_k:Activations_k;
+        int next_state = (has_bias)?Bias1_k:Empty_k;
+        internal_state_D = (read_addr_reg == end_addr_reg)?next_state:Activations_k;
     }
     else if (internal_state == Bias1_k) {
         for (int i=1; i < NUM_PE; i++) {

@@ -63,7 +63,7 @@ void SpMatRead::connect(BaseModule *dependency) {
         start_addr_D = static_cast<SharedWire>(&(module_d->start_addr));
         end_addr_D = static_cast<SharedWire>(&(module_d->end_addr));
         valid_D = static_cast<SharedWire>(&(module_d->valid));
-        value_D = static_cast<SharedWire>(&(module_d->value));
+        value_D = static_cast<SharedWire>(&(module_d->value_w));
     }
     else {
         LOG_ERROR("Unknown Module Type!");
@@ -91,7 +91,8 @@ void SpMatRead::propagate() {
 
     value_next = value;
 
-    valid_next = valid && (memory_addr_shift_p != memory_addr_shift);
+    // valid_next = valid && (memory_addr_shift_p != memory_addr_shift); 
+    valid_next = valid;
 
     // Decision
     line_last = memory_addr == (end_addr / unit_line);

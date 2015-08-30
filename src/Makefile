@@ -1,12 +1,12 @@
 
 CXX=clang++
 
-DEBUG=1
+DEBUG=0
 
 ifeq ($(DEBUG), 1)
 	TEST_FLAGS=-Wall -g -std=c++11 -O0 -Wuninitialized -Wfatal-errors -D DEBUG=1
 else
-	TEST_FLAGS=-std=c++ -O2 
+	TEST_FLAGS=-std=c++11 -O2 
 endif
 LINK_FLAGS=-rdynamic 
 

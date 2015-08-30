@@ -46,7 +46,7 @@ void NzeroFetch::propagate() {
 #endif
     }
 
-    // Shortcut for arithmetic logics
+    // Shortcut for logics
     find = 0;
     for (pack_addr = (pack_addr_p + 1) % NUM_PE; pack_addr < NUM_PE; pack_addr++) {
         if (*(reinterpret_cast<float*>(acts_per_bank + pack_addr)) > 0.0f) {
