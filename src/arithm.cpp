@@ -51,22 +51,24 @@ void ArithmUnit::propagate() {
     read_addr = index + read_addr_last;
     read_addr_last_D = (patch_complete)?0:(read_addr+1);
     valid_w = valid;
-    if (valid) {
-        value_decode_D = codebook[value_code];
-    }
+    act_value_w = act_value;
+    value_decode_D = codebook[value_code];
     
     // Stage 2
-    bypass = valid_p && (read_addr == read_addr_p);
-    *(reinterpret_cast<float*>(&result_muladd)) = 
-        *(reinterpret_cast<float*>(&value_decode)) * *(reinterpret_cast<float*>(&act_value_p)) +
-        *(reinterpret_cast<float*>(&read_data));
-
-    write_enable = valid_p;
-    write_addr = read_addr_p;
-    write_data = result_muladd;
+    bypass = valid_p_p && (read_addr_p == read_addr_p_p);
+    *(reinterpret_cast<float*>(&result_mul_D)) = 
+        *(reinterpret_cast<float*>(&value_decode)) * *(reinterpret_cast<float*>(&act_value_p));
+    valid_p_w = valid_p;
+    read_addr_p_w = read_addr_p;
 
     // Stage 3
-    /// None
+    *(reinterpret_cast<float*>(&result_muladd)) = 
+    *(reinterpret_cast<float*>(&result_mul)) + *(reinterpret_cast<float*>(&read_data));
+
+    write_enable = valid_p_p;
+    write_addr = read_addr_p_p;
+    write_data = result_muladd;
+
 
 }
 
@@ -84,8 +86,13 @@ void ArithmUnit::update() {
     }
     read_addr_p = read_addr;
     value_decode = value_decode_D;
-    act_value_p = act_value;
+    act_value_p = act_value_w;
     valid_p = valid_w;
+
+    // Stage 3
+    result_mul = result_mul_D;
+    read_addr_p_p = read_addr_p_w;
+    valid_p_p = valid_p_w;
     if (bypass) {
         read_data = write_data;
     }

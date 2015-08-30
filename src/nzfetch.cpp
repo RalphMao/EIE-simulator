@@ -62,6 +62,7 @@ void NzeroFetch::propagate() {
     // Control logics
     next_shift = !(one_full && find);
     next_reg_addr = !find || ((pack_addr == NUM_PE - 1) && !one_full);
+    // next_reg_addr = next_shift && (pack_addr == NUM_PE - 1);
     write_enable = find && !one_full;
 }
 

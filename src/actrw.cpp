@@ -63,7 +63,7 @@ void ActRW::init(const char* datafile) {
     memset(ACTmem[1], 0, memory_size);
     if (file.is_open()) {                                               
                                                                         
-        if (!file.read(reinterpret_cast<char*>(ACTmem[which]), input_size)) { 
+        if (!file.read(reinterpret_cast<char*>(ACTmem[which]), input_size * sizeof(int32_t))) { 
             LOG_ERROR("File size does not match!");                     
         }                                                               
         file.close();                                                   
@@ -79,24 +79,24 @@ void ActRW::propagate() {
     // To Nonzero Fetch module
     if (internal_state == Activations_k) {
         for (int i=0; i < NUM_PE; i++) {
-            acts_per_bank[i] = ACTmem[nzf_id][read_addr_reg * bank_size + i];
+            acts_per_bank[i] = ACTmem[nzf_id][read_addr_reg * NUM_PE + i];
         }
         reg_addr_w = read_addr_reg;
         read_addr_reg_D = read_addr_reg + 1;
         internal_state_D = (read_addr_reg == end_addr_reg)?Bias1_k:Activations_k;
     }
     else if (internal_state == Bias1_k) {
-        *(reinterpret_cast<float*>(acts_per_bank)) = 1.0f;
         for (int i=1; i < NUM_PE; i++) {
-            acts_per_bank[i] = ACTmem[nzf_id][read_addr_reg * bank_size + i];
+            acts_per_bank[i] = 0;
         }
+        *(reinterpret_cast<float*>(acts_per_bank)) = 1.0f;
         reg_addr_w = end_addr_reg + 1;
         read_addr_reg_D = 0;
         internal_state_D = Empty_k;
     }
     else if (internal_state == Empty_k) {
         for (int i=0; i < NUM_PE; i++) {
-            acts_per_bank[i] = ACTmem[nzf_id][read_addr_reg * bank_size + i];
+            acts_per_bank[i] = 0;
         }
         reg_addr_w = 0;
         read_addr_reg_D = 0;
@@ -109,7 +109,7 @@ void ActRW::propagate() {
     // To Arithmetic Modules
     write_complete = 1;
     for (int i=0; i < NUM_PE; i++) {
-        read_data_arithm[i] = ACTmem[arithm_id][read_addr_arithm[i] * bank_size + i];
+        read_data_arithm[i] = ACTmem[arithm_id][read_addr_arithm[i] * NUM_PE + i];
         write_complete = write_complete && !write_enable[i];
     }
 
@@ -129,10 +129,12 @@ void ActRW::update() {
     // Of Arithmetic modules
     for (int i = 0; i < NUM_PE; i++) {
         if (*(write_enable_D[i])) {
-            ACTmem[arithm_id][write_addr_arithm[i] * bank_size] = write_data_arithm[i];
+            ACTmem[arithm_id][*(write_addr_arithm_D[i]) * NUM_PE + i] = *(write_data_arithm_D[i]);
         }
-        write_addr_arithm[i] = *(write_addr_arithm_D[i]);
+        read_addr_arithm[i] = *(read_addr_arithm_D[i]);
         write_data_arithm[i] = *(write_data_arithm_D[i]);
+        write_addr_arithm[i] = *(write_data_arithm_D[i]);
+        write_enable[i] = *(write_enable_D[i]);
     }
 }
 

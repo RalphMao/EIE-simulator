@@ -15,11 +15,21 @@
 #endif
 
 #define LOG(x) Message(__func__, __FILE__, __LINE__, (x))
+
 #define LOG_DEBUG(x) if(DEBUG) LOG(x)
 
 #define LOG_ERROR(x) MessageError(__func__, __FILE__, __LINE__, (x))
 
 #define P_V(x) std::cerr << #x ": " << x << std::endl
+
+#define P_VS(x,n) \
+std::cerr << #x ":["; \
+for (int vs_i = 0; vs_i < n; vs_i++) { \
+    std::cerr << x[vs_i] << ", "; } \
+std::cerr << "]" << std::endl
+
+
+
 
 inline void Message(const char *func, const char *file, int line, std::string x) {
     std::cerr << "================================================" << std::endl;

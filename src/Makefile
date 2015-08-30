@@ -1,7 +1,14 @@
 
-CXX=g++
-TEST_FLAGS=-Wall -g -std=c++11 -O0 -Wuninitialized -Wfatal-errors
-LINK_FLAGS=-rdynamic
+CXX=clang++
+
+DEBUG=1
+
+ifeq ($(DEBUG), 1)
+	TEST_FLAGS=-Wall -g -std=c++11 -O0 -Wuninitialized -Wfatal-errors -D DEBUG=1
+else
+	TEST_FLAGS=-std=c++ -O2 
+endif
+LINK_FLAGS=-rdynamic 
 
 O_FILES=spmat.o ptrvec.o arithm.o nzfetch.o actrw.o system.o
 C_FILES=spmat.cpp ptrvec.cpp arithm.cpp actrw.cpp nzfetch.cpp system.cpp

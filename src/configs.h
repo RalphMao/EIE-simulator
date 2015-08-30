@@ -4,7 +4,6 @@
 
 #include"params.h"
 
-#define DEBUG 1
 enum ModuleType {
     ActRW_k = 0,
     NzeroFetch_k,

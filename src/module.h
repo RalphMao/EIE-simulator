@@ -134,7 +134,7 @@ class SpMatRead : public BaseModule {
     Wire memory_addr, memory_shift;
     Wire addr, addr_residue;
     Wire memory_addr_shift;
-    Wire *data_read;
+    Wire data_read[SPMAT_unit_line * 2];
     Wire read;
 
     SharedWire start_addr_D, end_addr_D, valid_D, value_D;
@@ -157,14 +157,15 @@ class ArithmUnit : public BaseModule {
     virtual inline ModuleType name() { return Arithm_k;}
 
     Register patch_complete, index, value_code, act_value, valid;
-    Register read_addr_last;
+    Register read_addr_last, result_mul;
     Register read_addr_p, value_decode, act_value_p, valid_p, read_data;
+    Register read_addr_p_p, valid_p_p;
 
     Wire read_addr, value_decode_D, read_addr_last_D;
-    Wire value_to_add, result_muladd;
+    Wire value_to_add, result_muladd, result_mul_D;
     Wire bypass;
     Wire write_enable, write_addr, write_data;
-    Wire valid_w, valid_p_w, read_addr_p_w;
+    Wire valid_w, valid_p_w, read_addr_p_w, act_value_w;
 
     SharedWire patch_complete_D, index_D, value_code_D, act_value_D, valid_D;
     SharedWire read_data_D;

@@ -12,7 +12,6 @@ SpMatRead::SpMatRead(int id):BaseModule(id){
 
     int memory_size = unit_line * num_lines * sizeof(int32_t) * 2;
     WImem = static_cast<Memory>(new uint32_t[memory_size]);
-    data_read = static_cast<Wire*>(new uint32_t[unit_line * 2]);
 
     start_addr = 0;
     end_addr = 0;
@@ -29,7 +28,6 @@ SpMatRead::SpMatRead(int id):BaseModule(id){
 
 SpMatRead::~SpMatRead() {
     delete[] WImem;
-    delete[] data_read;
 }
 
 void SpMatRead::init(const char *datafile) {
@@ -84,9 +82,8 @@ void SpMatRead::propagate() {
 
     // Memory access
     if (valid && line_complete_p) {
-        for (int i=0; i < 2 * unit_line; i+= 2) {
+        for (int i=0; i < 2 * unit_line; i++) {
             data_read[i] = WImem[memory_addr * unit_line * 2 + i];
-            data_read[i+1] = WImem[memory_addr * unit_line * 2 + i+1];
         }
     }
     code= data_read[memory_shift * 2];

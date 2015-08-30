@@ -12,6 +12,7 @@ class System {
     System();
     ~System() {}
     void tic();
+    void init();
 
     inline bool done();
     void output(const char *output_file);
@@ -110,6 +111,16 @@ void Init(BaseModule *module) {
     }
 }
 
+void System::init() {
+
+    // Initialize all modules
+    for (int i = 0; i < num_modules; i++) {
+        Init(modules[i]);
+        modules[i]->propagate();
+    }
+}
+
+
 System::System() {
     num_modules = 0;
     cycles = 0;
@@ -122,12 +133,6 @@ System::System() {
             base_ptr = ModuleCreate(static_cast<ModuleType>(i), j);
             modules.push_back(base_ptr);
         }
-    }
-
-    // Initialize all modules
-    for (int i = 0; i < num_modules; i++) {
-        Init(modules[i]);
-        modules[i]->propagate();
     }
 
     // Connect necessary modules
@@ -154,11 +159,11 @@ System::System() {
 
 void System::tic() {
     for (int i = 0; i < num_modules; i++) {
-        modules[i]->propagate();
+        modules[i]->update();
     }
 
     for (int i = 0; i < num_modules; i++) {
-        modules[i]->update();
+        modules[i]->propagate();
     }
 
     cycles++;
@@ -169,33 +174,68 @@ inline bool System::done() {
 }
 
 void System::output(const char* output_file) {
-    if (done()) {
-        ActRW *ActRW_m = static_cast<ActRW*>(modules[0]);
-        ofstream file(output_file, ios::out);
-        if (file.is_open()) {
-            for (int i = 0; i < ACTRW_maxcapacity; i++) {
-                file << static_cast<float>(ActRW_m->ACTmem[1-ActRW_m->which][i]) << endl;
-            }
-            file.close();
-        }
-        else {
-            LOG_ERROR("Unable to open the file!");
-        }
+    ActRW *ActRW_m = static_cast<ActRW*>(modules[0]);
+    ofstream file(output_file, ios::out|ios::binary);
+    if (file.is_open()) {
+        file.write(reinterpret_cast<char*>(ActRW_m->ACTmem[1-ActRW_m->which]), ACTRW_maxcapacity * sizeof(float));
+        file.close();
+    }
+    else {
+        LOG_ERROR("Unable to open the file!");
     }
 }
+
+#if DEBUG == 1
+void print_v() {
+    // P_V(act[0]->state);
+    P_V(act[0]->read_addr_reg);
+    P_V(*(act[0]->write_enable_D[1]));
+    P_V(*(act[0]->write_addr_arithm_D[1]));
+    P_VS(act[0]->acts_per_bank, 4);
+
+    P_V(nzf[0]->pack_addr);
+    P_V(nzf[0]->write_enable);
+    P_V(nzf[0]->index_buffer);
+    P_V(nzf[0]->empty[1]);
+    P_V(nzf[0]->act_index_output[1]);
+
+    P_V(ptr[1]->start_addr);
+    P_V(ptr[1]->end_addr);
+    P_V(ptr[1]->valid);
+
+    P_V(spm[1]->read);
+    P_V(spm[1]->memory_addr_shift);
+    //P_VS(spm[1]->data_read, (2*SPMAT_unit_line));
+    P_V(spm[1]->index);
+    P_V(spm[1]->code);
+    P_V(spm[1]->valid_next);
+
+    P_V(aru[1]->read_addr);
+    // P_V(*(reinterpret_cast<float*>(&aru[1]->value_decode)));
+    P_V(*(reinterpret_cast<float*>(&aru[1]->result_muladd)));
+}
+#endif
 
 int main() {
     System system;
     ActRW *ControlUnit = static_cast<ActRW*>(system.modules[0]);
     ControlUnit->set_state(1, ACT_length, 0);
+    system.init();
 
     LOG("System initialization done");
     while (!system.done()) {
-        system.tic();
         LOG_DEBUG(("Cycle:"+(to_string(system.cycles))));
+#if DEBUG == 1
+        if (system.cycles > 300000) {
+            break;
+            }
+        print_v();
+#endif
+
+        system.tic();
     }
     LOG("One layer done");
-    system.output("output.txt");
+    system.output("output.dat");
     return 0;
 }
 
