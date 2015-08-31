@@ -42,4 +42,4 @@ $(O_FILES): $(C_FILES) $(H_FILES)
 	$(CXX) -c $(C_FILES) $(TEST_FLAGS)
 
 clean:
-	rm *.o test simulation
+	rm *.o simulation
