@@ -8,7 +8,7 @@ ifeq ($(DEBUG), 1)
 else
 	TEST_FLAGS=-std=c++11 -O2 
 endif
-LINK_FLAGS=-rdynamic 
+LINK_FLAGS=-rdynamic
 
 O_FILES=spmat.o ptrvec.o arithm.o nzfetch.o actrw.o system.o
 C_FILES=spmat.cpp ptrvec.cpp arithm.cpp actrw.cpp nzfetch.cpp system.cpp

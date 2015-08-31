@@ -189,8 +189,8 @@ void System::output(const char* output_file) {
 void print_v() {
     // P_V(act[0]->state);
     P_V(act[0]->read_addr_reg);
-    P_V(*(act[0]->write_enable_D[3]));
-    P_V(*(act[0]->write_addr_arithm_D[3]));
+    P_V(*(act[0]->write_enable_D[31]));
+    P_V(*(act[0]->write_addr_arithm_D[31]));
     P_VS(act[0]->acts_per_bank, 4);
 
     P_V(nzf[0]->pack_addr);
@@ -199,18 +199,18 @@ void print_v() {
     P_V(nzf[0]->empty[1]);
     P_V(nzf[0]->act_index_output[1]);
 
-    P_V(ptr[3]->start_addr);
-    P_V(ptr[3]->end_addr);
-    P_V(ptr[3]->valid);
+    P_V(ptr[31]->start_addr);
+    P_V(ptr[31]->end_addr);
+    P_V(ptr[31]->valid);
 
-    P_V(spm[3]->read);
-    P_V(spm[3]->memory_addr_shift);
-    //P_VS(spm[3]->data_read, (3*SPMAT_unit_line));
-    P_V(spm[3]->index);
-    P_V(spm[3]->code);
-    P_V(spm[3]->valid_next);
+    P_V(spm[31]->read);
+    P_V(spm[31]->memory_addr_shift);
+    //P_VS(spm[31]->data_read, (31*SPMAT_unit_line));
+    P_V(spm[31]->index);
+    P_V(spm[31]->code);
+    P_V(spm[31]->valid_next);
 
-    P_V(aru[3]->read_addr);
+    P_V(aru[31]->read_addr);
     // P_V(*(reinterpret_cast<float*>(&aru[3]->value_decode)));
     P_V(*(reinterpret_cast<float*>(&aru[3]->result_muladd)));
 }
@@ -219,7 +219,7 @@ void print_v() {
 int main() {
     System system;
     ActRW *ControlUnit = static_cast<ActRW*>(system.modules[0]);
-    ControlUnit->set_state(1, ACT_length, 0, 0);
+    ControlUnit->set_state(1, ACT_length, 0, 1);
     system.init();
 
     LOG("System initialization done");

@@ -13,7 +13,7 @@ import caffe
 
 caffe.set_mode_gpu()                                               
 caffe.set_device(0)                                                
-option = 'lenet5'
+option = 'alexnet'
 if option == 'lenet5':                                             
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'       
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'     
@@ -155,7 +155,7 @@ if option == 'lenet5':
     layers = ['ip1']
     bank_num = 4
 else:
-    layers = ['fc6']
+    layers = ['fc7']
     bank_num = 32
 
 codebook = kmeans(net, layers)
@@ -223,8 +223,8 @@ if option == 'lenet5':
         act = net.blobs['pool2'].data[idx % batch_size]
         ground_truth = net.blobs['ip1'].data[idx % batch_size]
 else:
-    act = net.blobs['pool5'].data[idx % batch_size]
-    ground_truth = net.blobs['fc6'].data[idx % batch_size]
+    act = net.blobs['fc6'].data[idx % batch_size]
+    ground_truth = net.blobs['fc7'].data[idx % batch_size]
 
 spm_unitsize = 8
 if option == "lenet5":

@@ -22,8 +22,11 @@ SpMatRead::SpMatRead(int id):BaseModule(id){
     current_addr_shift = 0;
     patch_complete_p = 1;
     line_complete_p = 1;
-
     memory_addr_shift_p = 0;
+    for (int i=0; i < 2 * unit_line; i++) {
+        data_read[i] = 0;
+    }
+
 }
 
 SpMatRead::~SpMatRead() {

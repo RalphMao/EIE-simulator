@@ -132,6 +132,11 @@ void ActRW::update() {
     // Of Arithmetic modules
     for (int i = 0; i < NUM_PE; i++) {
         if (*(write_enable_D[i])) {
+            /*
+            if (*(write_addr_arithm_D[i]) * NUM_PE + i >= ACTRW_maxcapacity) {
+                LOG_ERROR("error here! i:"+std::to_string(i) + ":" + std::to_string(*(write_addr_arithm_D[i])));
+            }
+            */
             ACTmem[arithm_id][*(write_addr_arithm_D[i]) * NUM_PE + i] = *(write_data_arithm_D[i]);
         }
         read_addr_arithm[i] = *(read_addr_arithm_D[i]);
