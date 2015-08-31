@@ -34,6 +34,32 @@ vector<NzeroFetch*> nzf;
 vector<PtrRead*> ptr;
 vector<SpMatRead*> spm;
 vector<ArithmUnit*> aru;
+
+void print_v() {
+    P_V(act[0]->read_addr_reg);
+    P_V(*(act[0]->write_enable_D[NUM_PE-1]));
+    P_V(*(act[0]->write_addr_arithm_D[NUM_PE-1]));
+    P_VS(act[0]->acts_per_bank, 4);
+
+    P_V(nzf[0]->pack_addr);
+    P_V(nzf[0]->write_enable);
+    P_V(nzf[0]->index_buffer);
+    P_V(nzf[0]->empty[1]);
+    P_V(nzf[0]->act_index_output[1]);
+
+    P_V(ptr[NUM_PE-1]->start_addr);
+    P_V(ptr[NUM_PE-1]->end_addr);
+    P_V(ptr[NUM_PE-1]->valid);
+
+    P_V(spm[NUM_PE-1]->read);
+    P_V(spm[NUM_PE-1]->memory_addr_shift);
+    P_V(spm[NUM_PE-1]->index);
+    P_V(spm[NUM_PE-1]->code);
+    P_V(spm[NUM_PE-1]->valid_next);
+
+    P_V(aru[NUM_PE-1]->read_addr);
+    P_V(*(reinterpret_cast<float*>(&aru[3]->result_muladd)));
+}
 #endif
 
 BaseModule *ModuleCreate(ModuleType type, int id) {
@@ -141,16 +167,10 @@ System::System() {
             if (topology[modules[i]->name()][modules[j]->name()] == Connect_by_id) {
                 if (modules[i]->id() == modules[j]->id()) {
                     modules[i]->connect(modules[j]);
-                    if (modules[i]->name()==ActRW_k) {
-                        LOG_DEBUG(to_string(modules[i]->name()) +"_" + to_string(modules[i]->id()) + "->" + to_string(modules[j]->name()) + to_string(modules[j]->id()));
-                    }
                 }
             }
             else if (topology[modules[i]->name()][modules[j]->name()] == Connect_all) {
                 modules[i]->connect(modules[j]);
-                    if (modules[i]->name()==ActRW_k) {
-                        LOG_DEBUG(to_string(modules[i]->name()) +"_" + to_string(modules[i]->id()) + "->" + to_string(modules[j]->name()) + to_string(modules[j]->id()));
-                    }
             }
         }
     }
@@ -185,36 +205,6 @@ void System::output(const char* output_file) {
     }
 }
 
-#if DEBUG == 1
-void print_v() {
-    // P_V(act[0]->state);
-    P_V(act[0]->read_addr_reg);
-    P_V(*(act[0]->write_enable_D[31]));
-    P_V(*(act[0]->write_addr_arithm_D[31]));
-    P_VS(act[0]->acts_per_bank, 4);
-
-    P_V(nzf[0]->pack_addr);
-    P_V(nzf[0]->write_enable);
-    P_V(nzf[0]->index_buffer);
-    P_V(nzf[0]->empty[1]);
-    P_V(nzf[0]->act_index_output[1]);
-
-    P_V(ptr[31]->start_addr);
-    P_V(ptr[31]->end_addr);
-    P_V(ptr[31]->valid);
-
-    P_V(spm[31]->read);
-    P_V(spm[31]->memory_addr_shift);
-    //P_VS(spm[31]->data_read, (31*SPMAT_unit_line));
-    P_V(spm[31]->index);
-    P_V(spm[31]->code);
-    P_V(spm[31]->valid_next);
-
-    P_V(aru[31]->read_addr);
-    // P_V(*(reinterpret_cast<float*>(&aru[3]->value_decode)));
-    P_V(*(reinterpret_cast<float*>(&aru[3]->result_muladd)));
-}
-#endif
 
 int main() {
     System system;
@@ -226,16 +216,18 @@ int main() {
     while (!system.done() || system.cycles < 9) {
         LOG_DEBUG(("Cycle:"+(to_string(system.cycles))));
 #if DEBUG == 1
-        if (system.cycles > 200) {
-            break;
+        if (system.cycles < 200) {
+            print_v();
             }
-        print_v();
 #endif
 
         system.tic();
     }
     LOG("One layer done, cycles:" + to_string(system.cycles));
-    system.output("output.dat");
+#if DEBUG == 1
+    LOG("Efficiency:" + to_string(double(act[0]->valid_write_times) / system.cycles / NUM_PE));
+    system.output("data/output.dat");
+#endif
     return 0;
 }
 

@@ -58,6 +58,8 @@ class ActRW : public BaseModule {
     int bank_size;
     int input_size;
 
+    unsigned int valid_write_times; // Statistics
+
 };
 
 

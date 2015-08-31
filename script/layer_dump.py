@@ -156,7 +156,7 @@ if option == 'lenet5':
     bank_num = 4
 else:
     layers = ['fc7']
-    bank_num = 32
+    bank_num = 64
 
 codebook = kmeans(net, layers)
 codes_W, codes_b = get_codes(net, codebook)
@@ -196,7 +196,7 @@ template = r'''
 // Config harware
 const int NUM_PE = {{ bank_num }};
 const int ACTRW_maxcapacity = {{ max_size }};
-const int NZFETCH_buffersize = 4;  
+const int NZFETCH_buffersize = {{ buffer_size }};  
 const int PTRVEC_num_lines = {{ ptr_lines }};  
 const int SPMAT_unit_line   =  {{ spm_unitsize }};  
 const int SPMAT_num_lines   =  {{ spm_lines }}; 
@@ -209,11 +209,16 @@ const int ACT_length = {{act_length}};
 #endif
 '''
 ###################################################
+# Configuration
+spm_unitsize = 8
+buffer_size = 4
+
+##################################################
 batch_size = net.blobs['conv1'].data.shape[0]
 for i in range(idx / batch_size+1):
     net.forward()
 
-one_act = 0
+one_act = 0 # For debug
 
 if option == 'lenet5':
     if one_act:
@@ -226,7 +231,6 @@ else:
     act = net.blobs['fc6'].data[idx % batch_size]
     ground_truth = net.blobs['fc7'].data[idx % batch_size]
 
-spm_unitsize = 8
 if option == "lenet5":
     max_inputsize = 1024
 else:
@@ -236,7 +240,7 @@ act_length = act.size
 jtem = Template(template)
 config_file = jtem.render(bank_num = bank_num, ptr_lines = ptr[0].size, 
     spm_unitsize = spm_unitsize, spm_lines = (max_memsize - 1) / spm_unitsize, 
-    max_size = max_inputsize, act_length = act_length)
+    max_size = max_inputsize, act_length = act_length, buffer_size = buffer_size)
 
 with open("%s/data/act.dat"%simulator_root, 'wb') as f:
     act.tofile(f)

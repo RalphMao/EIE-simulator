@@ -38,6 +38,8 @@ ActRW::ActRW() : BaseModule() {
         write_enable[i] = 0;
     }
 
+    valid_write_times = 0;
+
 }
 
 ActRW::~ActRW() {
@@ -138,6 +140,7 @@ void ActRW::update() {
             }
             */
             ACTmem[arithm_id][*(write_addr_arithm_D[i]) * NUM_PE + i] = *(write_data_arithm_D[i]);
+            valid_write_times++;
         }
         read_addr_arithm[i] = *(read_addr_arithm_D[i]);
         write_data_arithm[i] = *(write_data_arithm_D[i]);
