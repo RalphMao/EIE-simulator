@@ -1,6 +1,7 @@
 
 from jinja2 import Template 
 from lxml import html
+import os
 
 template='''
 cache_size={{ cache_size }}&nrbanks={{banks}}&rwports=0&read_ports=1&write_ports=1&ser_ports=0&output={{bits_out}}&technode=35&temp=300&
@@ -13,7 +14,7 @@ url = "http://quid.hpl.hp.com:9081/cacti/sram.y"
 def get_params(**kwargs): #(cache_size = 16384, banks = 1, bits_out = 128):
     query = jtem.render(kwargs)
 
-    os.system("curl -sd %s %s > tmp.html"%(query, url))
+    os.system("curl -s %s %s > tmp.html"%(query, url))
 
     html_f = open('tmp.html').read()
     tree = html.parse(html_f)
@@ -21,3 +22,6 @@ def get_params(**kwargs): #(cache_size = 16384, banks = 1, bits_out = 128):
     x = tree.xpath(r"/html/body/div[@class='page']/div[@class='contentcolumn']/table/tr[3]/td/text()")
 
     return x
+
+if __name__ == "__main__":
+    print get_params(cache_size = 16384, banks = 1, bits_out = 128)
