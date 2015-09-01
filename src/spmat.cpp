@@ -3,6 +3,7 @@
 #include"module.h"
 #include<fstream>
 #include<iostream>
+using namespace std;
 
 SpMatRead::SpMatRead(int id)
         : BaseModule(id) {
@@ -34,10 +35,12 @@ SpMatRead::~SpMatRead() {
     delete[] WImem;
 }
 
-void SpMatRead::init(const char *datafile) {
-    using namespace std;
-    ifstream file(datafile, ios::in | ios::binary);
-    ifstream file_test(datafile, ios::in | ios::binary | ios::ate);
+void SpMatRead::init() {
+    string filename = datafile[SpMatRead_k];
+    filename += to_string(id());
+    filename += ".dat";
+    ifstream file(filename.c_str(), ios::in | ios::binary);
+    ifstream file_test(filename, ios::in | ios::binary | ios::ate);
     if (file.is_open()) {
         int memory_size = unit_line * num_lines * sizeof(int32_t) * 2;
         int file_size = static_cast<int>(file_test.tellg());

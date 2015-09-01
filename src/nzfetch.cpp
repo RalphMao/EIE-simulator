@@ -3,7 +3,6 @@
 #include"module.h"
 #include<iostream>
 
-#include<cstring>
 using namespace std;
 
 NzeroFetch::NzeroFetch()

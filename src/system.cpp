@@ -1,7 +1,6 @@
 #include"module.h"
 #include"utils.h"
 #include<vector>
-#include<string>
 #include<fstream>
 
 using namespace std;
@@ -107,41 +106,9 @@ BaseModule *ModuleCreate(ModuleType type, int id) {
     return ans;
 }
 
-void Init(BaseModule *module) {
-    ModuleType type = module->name();
-    int id = module->id();
-    string filename = "data/";
-    filename += datafile[type];
-    if (type == PtrRead_k || type == SpMatRead_k) {
-        filename += to_string(id);
-    }
-    filename += ".dat";
-
-    switch (type) {
-        case ActRW_k:
-            static_cast<ActRW*>(module)->init(filename.c_str());
-            break;
-        case NzeroFetch_k:
-            break;
-        case PtrRead_k:
-            static_cast<PtrRead*>(module)->init(filename.c_str());
-            break;
-        case SpMatRead_k:
-            static_cast<SpMatRead*>(module)->init(filename.c_str());
-            break;
-        case Arithm_k:
-            static_cast<ArithmUnit*>(module)->init(filename.c_str());
-            break;
-        default:
-            LOG_ERROR("Unknown module type!");
-    }
-}
-
 void System::init() {
-
-    // Initialize all modules
     for (int i = 0; i < num_modules; i++) {
-        Init(modules[i]);
+        modules[i]->init();
         modules[i]->propagate();
     }
 }

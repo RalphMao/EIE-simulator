@@ -3,6 +3,7 @@
 #include"module.h" 
 #include<fstream>  
 #include<iostream> 
+using namespace std;
 
 bool ArithmUnit::initialized;
 uint32_t ArithmUnit::codebook[ARITHM_codebooksize];
@@ -29,10 +30,10 @@ ArithmUnit::ArithmUnit(int id)
     initialized = false;
 }
 
-void ArithmUnit::init(const char* datafile) {
-    using namespace std;
+void ArithmUnit::init() {
     if (!initialized) {
-        ifstream file(datafile, ios::in | ios::binary);
+        string filename = datafile[Arithm_k];
+        ifstream file(filename.c_str(), ios::in | ios::binary);
         if (file.is_open()) {
             int memory_size = codebook_size * sizeof(int32_t);
             if (!file.read(reinterpret_cast<char*>(codebook), memory_size)) {

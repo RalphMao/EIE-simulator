@@ -3,3 +3,10 @@ build
 data
 *.bin
 *.mat
+.cproject
+.project
+.settings/
+src/.cproject
+src/.project
+src/.settings/
+src/params.h
