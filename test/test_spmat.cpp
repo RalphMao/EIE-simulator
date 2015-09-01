@@ -5,17 +5,27 @@
 
 using namespace std;
 
-PtrRead::PtrRead(int id) :BaseModule(id) {}
+PtrRead::PtrRead(int id)
+        : BaseModule(id) {
+}
 
-PtrRead::~PtrRead(){}
+PtrRead::~PtrRead() {
+}
 
-void init(char *datafile) {}
+void init(char *datafile) {
+}
 
-void PtrRead::propagate(){start_addr = 2; end_addr = 20;valid=1;}
+void PtrRead::propagate() {
+    start_addr = 2;
+    end_addr = 20;
+    valid = 1;
+}
 
-void PtrRead::update() {}
+void PtrRead::update() {
+}
 
-void PtrRead::connect(BaseModule *dependency) {}
+void PtrRead::connect(BaseModule *dependency) {
+}
 
 int main() {
     PtrRead PtrR_M(0);
@@ -30,19 +40,16 @@ int main() {
     int cycles = 35;
     for (int i = 0; i < cycles; i++) {
         modules[1]->propagate();
-        if (i==0) {
+        if (i == 0) {
             PtrR_M.propagate();
-        }
-        else if (i==19) {
+        } else if (i == 19) {
             PtrR_M.start_addr = 22;
             PtrR_M.end_addr = 29;
-        }
-        else if (i>23 && i <= 30) {
+        } else if (i > 23 && i <= 30) {
             PtrR_M.start_addr = 30;
             PtrR_M.end_addr = 29;
             PtrR_M.valid = 0;
-        }
-        else if (i == 31) {
+        } else if (i == 31) {
             PtrR_M.start_addr = 38;
             PtrR_M.end_addr = 38;
             PtrR_M.valid = 1;
@@ -59,7 +66,7 @@ int main() {
         P_V(SPMat_M.memory_shift);
         P_V(SPMat_M.line_complete);
         P_V(SPMat_M.patch_complete);
-        std::cout << "==========================================="<<std::endl;
+        std::cout << "===========================================" << std::endl;
 
         for (int m = 0; m < modules.size(); m++) {
             modules[m]->update();
@@ -67,6 +74,4 @@ int main() {
 
     }
 }
-        
-        
 

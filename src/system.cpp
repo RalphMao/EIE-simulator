@@ -1,4 +1,3 @@
-
 #include"module.h"
 #include"utils.h"
 #include<vector>
@@ -8,9 +7,10 @@
 using namespace std;
 
 class System {
-    public:
+ public:
     System();
-    ~System() {}
+    ~System() {
+    }
     void tic();
     void init();
 
@@ -86,22 +86,22 @@ BaseModule *ModuleCreate(ModuleType type, int id) {
 #if DEBUG == 1
     switch (type) {
         case ActRW_k:
-            act.push_back(static_cast<ActRW*>(ans));
-            break;
+        act.push_back(static_cast<ActRW*>(ans));
+        break;
         case NzeroFetch_k:
-            nzf.push_back(static_cast<NzeroFetch*>(ans));
-            break;
+        nzf.push_back(static_cast<NzeroFetch*>(ans));
+        break;
         case PtrRead_k:
-            ptr.push_back(static_cast<PtrRead*>(ans));
-            break;
+        ptr.push_back(static_cast<PtrRead*>(ans));
+        break;
         case SpMatRead_k:
-            spm.push_back(static_cast<SpMatRead*>(ans));
-            break;
+        spm.push_back(static_cast<SpMatRead*>(ans));
+        break;
         case Arithm_k:
-            aru.push_back(static_cast<ArithmUnit*>(ans));
-            break;
+        aru.push_back(static_cast<ArithmUnit*>(ans));
+        break;
         default:
-            break;
+        break;
     }
 #endif
     return ans;
@@ -115,7 +115,7 @@ void Init(BaseModule *module) {
     if (type == PtrRead_k || type == SpMatRead_k) {
         filename += to_string(id);
     }
-    filename +=".dat";
+    filename += ".dat";
 
     switch (type) {
         case ActRW_k:
@@ -146,7 +146,6 @@ void System::init() {
     }
 }
 
-
 System::System() {
     num_modules = 0;
     cycles = 0;
@@ -168,13 +167,12 @@ System::System() {
                 if (modules[i]->id() == modules[j]->id()) {
                     modules[i]->connect(modules[j]);
                 }
-            }
-            else if (topology[modules[i]->name()][modules[j]->name()] == Connect_all) {
+            } else if (topology[modules[i]->name()][modules[j]->name()] == Connect_all) {
                 modules[i]->connect(modules[j]);
             }
         }
     }
-                
+
 }
 
 void System::tic() {
@@ -195,16 +193,14 @@ inline bool System::done() {
 
 void System::output(const char* output_file) {
     ActRW *ActRW_m = static_cast<ActRW*>(modules[0]);
-    ofstream file(output_file, ios::out|ios::binary);
+    ofstream file(output_file, ios::out | ios::binary);
     if (file.is_open()) {
-        file.write(reinterpret_cast<char*>(ActRW_m->ACTmem[1-ActRW_m->which]), ACTRW_maxcapacity * sizeof(float));
+        file.write(reinterpret_cast<char*>(ActRW_m->ACTmem[1 - ActRW_m->which]), ACTRW_maxcapacity * sizeof(float));
         file.close();
-    }
-    else {
+    } else {
         LOG_ERROR("Unable to open the file!");
     }
 }
-
 
 int main() {
     System system;
@@ -214,11 +210,11 @@ int main() {
 
     LOG("System initialization done");
     while (!system.done() || system.cycles < 9) {
-        LOG_DEBUG(("Cycle:"+(to_string(system.cycles))));
+        LOG_DEBUG(("Cycle:" + (to_string(system.cycles))));
 #if DEBUG == 1
         if (system.cycles < 200) {
             print_v();
-            }
+        }
 #endif
 
         system.tic();

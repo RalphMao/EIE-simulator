@@ -5,15 +5,18 @@
 
 using namespace std;
 
-NzeroFetch::NzeroFetch() :BaseModule() {}
+NzeroFetch::NzeroFetch()
+        : BaseModule() {
+}
 void NzeroFetch::propagate() {
     act_index_output[0] = 3;
     value_output[0] = 2;
     empty[0] = 1;
 }
-void NzeroFetch::update() {}
-void NzeroFetch::connect(BaseModule *dependency) {}
-
+void NzeroFetch::update() {
+}
+void NzeroFetch::connect(BaseModule *dependency) {
+}
 
 int main() {
     PtrRead PtrR_M(0);
@@ -38,16 +41,13 @@ int main() {
         modules[1]->propagate();
         modules[0]->propagate();
 
-        if (i==2) {
+        if (i == 2) {
             NZF_M.empty[0] = 0;
-        }
-        else if (i == 3) {
+        } else if (i == 3) {
             NZF_M.act_index_output[0] = 5;
-        }
-        else if (i == 4) {
+        } else if (i == 4) {
             NZF_M.empty[0] = 1;
-        }
-        else if (i == 37) {
+        } else if (i == 37) {
             NZF_M.empty[0] = 0;
             NZF_M.act_index_output[0] = 7;
         }
@@ -68,7 +68,7 @@ int main() {
         P_V(SPMat_M.valid);
         P_V(SPMat_M.valid_next);
         P_V(SPMat_M.patch_complete);
-        std::cout << "==========================================="<<std::endl;
+        std::cout << "===========================================" << std::endl;
 
         for (int m = 0; m < modules.size(); m++) {
             modules[m]->update();
