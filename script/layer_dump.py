@@ -115,13 +115,12 @@ def get_csc(codes_W, codes_b, bank_num=64, max_jump = 16):
             for col in range(tmp.shape[1]):
                 loc = np.where(tmp[:,col] != 0)[0]
                 if len(loc) > 0:
-                    distance_loc = np.append(loc[0], np.diff(loc))
-                    zeros = distance_loc / max_jump
+                    distance_loc = np.append(loc[0], np.diff(loc)-1)
+                    zeros = distance_loc/max_jump
                     idx_vec = np.cumsum(zeros+1)-1
                     ptr_tmp[col+1] = idx_vec[-1]+1 + ptr_tmp[col]
                     spm_tmp[ptr_tmp[col] + idx_vec] = tmp[loc, col]
-                    distance_loc[0] += 1
-                    ind_tmp[ptr_tmp[col] + idx_vec] = (distance_loc-1) % 16
+                    ind_tmp[ptr_tmp[col] + idx_vec] = distance_loc % max_jump
                 else:
                     ptr_tmp[col+1] = ptr_tmp[col]
             
@@ -129,13 +128,12 @@ def get_csc(codes_W, codes_b, bank_num=64, max_jump = 16):
 
             loc = np.where(tmp_bias != 0)[0]
             if len(loc) > 0:
-                distance_loc = np.append(loc[0], np.diff(loc))
+                distance_loc = np.append(loc[0], np.diff(loc)-1)
                 zeros = distance_loc / max_jump
                 idx_vec = np.cumsum(zeros+1)-1
                 ptr_tmp[-1] = idx_vec[-1]+1 + ptr_tmp[-2]
                 spm_tmp[ptr_tmp[-2] + idx_vec] = tmp_bias[loc]
-                distance_loc[0] += 1
-                ind_tmp[ptr_tmp[-2] + idx_vec] = (distance_loc-1) % 16
+                ind_tmp[ptr_tmp[-2] + idx_vec] = distance_loc % max_jump
             else:
                 ptr_tmp[-1] = ptr_tmp[-2]
 
@@ -198,7 +196,7 @@ const int NUM_PE = {{ bank_num }};
 const int ACTRW_maxcapacity = {{ max_size }};
 const int NZFETCH_buffersize = {{ buffer_size }};  
 const int PTRVEC_num_lines = {{ ptr_lines }};  
-const int SPMAT_unit_line   =  {{ spm_unitsize }};  
+const int SPMAT_unit_line   =  {{ spm_unitsize }};  // Nzeros per line
 const int SPMAT_num_lines   =  {{ spm_lines }}; 
 const int SPMAT_index_bits  =  4;  
 const int SPMAT_weights_bits=  4;  
@@ -218,7 +216,7 @@ batch_size = net.blobs['conv1'].data.shape[0]
 for i in range(idx / batch_size+1):
     net.forward()
 
-one_act = 0 # For debug
+one_act = 1 # For debug
 
 if option == 'lenet5':
     if one_act:
@@ -239,7 +237,7 @@ act_length = act.size
 
 jtem = Template(template)
 config_file = jtem.render(bank_num = bank_num, ptr_lines = ptr[0].size, 
-    spm_unitsize = spm_unitsize, spm_lines = (max_memsize - 1) / spm_unitsize, 
+    spm_unitsize = spm_unitsize, spm_lines = (max_memsize - 1) / spm_unitsize / 2 + 1, 
     max_size = max_inputsize, act_length = act_length, buffer_size = buffer_size)
 
 with open("%s/data/act.dat"%simulator_root, 'wb') as f:
