@@ -3,7 +3,9 @@
 #include"module.h" 
 #include<fstream>  
 #include<iostream> 
-#include<cstring>
+#include<string.h>
+
+using namespace std;
 
 enum InterState {
     Activations_k = 0,
@@ -60,9 +62,9 @@ void ActRW::set_state(int state_t, int input_size_t, int which_t, int bias_t) {
     end_addr_reg = (input_size - 1) / NUM_PE;
 }
 
-void ActRW::init(const char* datafile) {
-    using namespace std;
-    ifstream file(datafile, ios::in | ios::binary);
+void ActRW::init() {
+    string filename = datafile[ActRW_k];
+    ifstream file(filename.c_str(), ios::in | ios::binary);
     int memory_size = bank_size * NUM_PE * sizeof(int32_t);
     memset(ACTmem[0], 0, memory_size);
     memset(ACTmem[1], 0, memory_size);

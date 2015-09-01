@@ -3,6 +3,7 @@
 #include"module.h"
 #include<fstream>
 #include<iostream>
+using namespace std;
 
 PtrRead::PtrRead(int id)
         : BaseModule(id) {
@@ -19,9 +20,11 @@ PtrRead::PtrRead(int id)
 PtrRead::~PtrRead() {
     delete[] PTRmem;
 }
-void PtrRead::init(const char *datafile) {
-    using namespace std;
-    ifstream file(datafile, ios::in | ios::binary);
+void PtrRead::init() {
+    string filename = datafile[PtrRead_k];
+    filename += to_string(id());
+    filename += ".dat";
+    ifstream file(filename.c_str(), ios::in | ios::binary);
     if (file.is_open()) {
         int memory_size = num_lines * sizeof(int32_t);
 

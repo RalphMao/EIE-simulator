@@ -5,7 +5,7 @@ EXE := simulation
 TARGET := $(BUILD)/$(EXE)
 
 
-CXX = clang++
+CXX = g++
 
 DEBUG := 1
 
