@@ -1,7 +1,7 @@
 
 CXX=clang++
 
-DEBUG=0
+DEBUG=1
 
 ifeq ($(DEBUG), 1)
 	TEST_FLAGS=-Wall -g -std=c++11 -O0 -Wuninitialized -Wfatal-errors -D DEBUG=1

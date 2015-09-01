@@ -5,17 +5,29 @@
 
 using namespace std;
 
-ActRW::ActRW() :BaseModule() {}
-ActRW::~ActRW() {}
-void ActRW::propagate() {}
-void ActRW::update() {}
-void ActRW::connect(BaseModule *dependency) {}
+ActRW::ActRW()
+        : BaseModule() {
+}
+ActRW::~ActRW() {
+}
+void ActRW::propagate() {
+}
+void ActRW::update() {
+}
+void ActRW::connect(BaseModule *dependency) {
+}
 
-SpMatRead::SpMatRead(int id) :BaseModule(id) {}
-SpMatRead::~SpMatRead() {}
-void SpMatRead::propagate() {}
-void SpMatRead::update() {}
-void SpMatRead::connect(BaseModule *dependency) {}
+SpMatRead::SpMatRead(int id)
+        : BaseModule(id) {
+}
+SpMatRead::~SpMatRead() {
+}
+void SpMatRead::propagate() {
+}
+void SpMatRead::update() {
+}
+void SpMatRead::connect(BaseModule *dependency) {
+}
 
 int main() {
     ActRW act;
@@ -36,7 +48,7 @@ int main() {
     for (int i = 0; i < cycles; i++) {
         aru.propagate();
 
-        *(reinterpret_cast<float*>(&(act.read_data_arithm))) = (float)aru.read_addr;
+        *(reinterpret_cast<float*>(&(act.read_data_arithm))) = (float) aru.read_addr;
 
         if (i == 0) {
             spm.patch_complete = 1;
@@ -44,23 +56,18 @@ int main() {
             spm.code = 1;
             spm.valid_next = 0;
             *(reinterpret_cast<float*>(&(spm.value_next))) = 1.0;
-        }
-        else if (i == 2) {
+        } else if (i == 2) {
             spm.valid_next = 1;
-        }
-        else if (i == 3) {
+        } else if (i == 3) {
             spm.patch_complete = 0;
             spm.index = 1;
-            spm.code = i-1;
-        }
-        else if (i == 10) {
+            spm.code = i - 1;
+        } else if (i == 10) {
             spm.patch_complete = 1;
-        }
-        else if (i == 11) {
+        } else if (i == 11) {
             spm.patch_complete = 0;
             spm.index = 8;
-        }
-        else if (i == 12) {
+        } else if (i == 12) {
             spm.valid_next = 0;
         }
         std::cout << "Cycles:" << i << std::endl;
@@ -78,14 +85,9 @@ int main() {
         P_V(*(reinterpret_cast<float*>(&(aru.value_decode))));
         P_V(*(reinterpret_cast<float*>(&(aru.act_value_p))));
         P_V(*(reinterpret_cast<float*>(&(aru.write_data))));
-        std::cout << "==========================================="<<std::endl;
+        std::cout << "===========================================" << std::endl;
 
         aru.update();
     }
 }
 
-
-
-
-
-    
