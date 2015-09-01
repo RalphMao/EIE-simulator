@@ -1,4 +1,3 @@
-
 #ifndef MODULE
 #define MODULE
 
@@ -11,21 +10,30 @@ typedef uint32_t* Memory;
 typedef const uint32_t* SharedWire;
 
 class BaseModule {
-    public:
-    
-    BaseModule() {module_id=0;}
-    BaseModule(int id) {module_id=id;}
-    virtual ~BaseModule() {}
+ public:
+
+    BaseModule() {
+        module_id = 0;
+    }
+    BaseModule(int id) {
+        module_id = id;
+    }
+    virtual ~BaseModule() {
+    }
     virtual void propagate() = 0;
     virtual void update() = 0;
     virtual void connect(BaseModule *dependency) = 0;
-    virtual inline ModuleType name() { return Base_k;}
-    inline int id() { return module_id;}
+    virtual inline ModuleType name() {
+        return Base_k;
+    }
+    inline int id() {
+        return module_id;
+    }
     int module_id;
 };
 
 class ActRW : public BaseModule {
-    public:
+ public:
 
     ActRW();
     ~ActRW();
@@ -34,43 +42,46 @@ class ActRW : public BaseModule {
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
-    virtual inline ModuleType name() { return ActRW_k;}
+    virtual inline ModuleType name() {
+        return ActRW_k;
+    }
 
     Memory ACTmem[2];
 
     // To NzeroFetch
     Register read_addr_reg, end_addr_reg;
     Register which, internal_state, has_bias;
-    Register state; // Not used so far
+    Register state;  // Not used so far
     Wire reg_addr_w;
     Wire read_addr_reg_D, internal_state_D;
     Wire acts_per_bank[NUM_PE];
     SharedWire next_reg_addr;
 
     // To Arithmetic module
-    Register read_addr_arithm[NUM_PE], write_addr_arithm[NUM_PE], 
-        write_data_arithm[NUM_PE], write_enable[NUM_PE];
+    Register read_addr_arithm[NUM_PE], write_addr_arithm[NUM_PE], write_data_arithm[NUM_PE], write_enable[NUM_PE];
     Wire read_data_arithm[NUM_PE];
     Wire write_complete, layer_complete;
-    SharedWire read_addr_arithm_D[NUM_PE], write_addr_arithm_D[NUM_PE], 
-        write_data_arithm_D[NUM_PE], write_enable_D[NUM_PE];
+    SharedWire read_addr_arithm_D[NUM_PE], write_addr_arithm_D[NUM_PE], write_data_arithm_D[NUM_PE],
+            write_enable_D[NUM_PE];
 
     int bank_size;
     int input_size;
 
-    unsigned int valid_write_times; // Statistics
+    unsigned int valid_write_times;  // Statistics
 
 };
 
-
 class NzeroFetch : public BaseModule {
-    public:
+ public:
     NzeroFetch();
-    virtual ~NzeroFetch() {}
+    virtual ~NzeroFetch() {
+    }
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
-    virtual inline ModuleType name() { return NzeroFetch_k;}
+    virtual inline ModuleType name() {
+        return NzeroFetch_k;
+    }
 
     // Nonzero find
     Register pack_addr_p;
@@ -96,11 +107,13 @@ class NzeroFetch : public BaseModule {
 };
 
 class PtrRead : public BaseModule {
-    public:
-    PtrRead(int id); 
+ public:
+    PtrRead(int id);
     virtual ~PtrRead();
     void init(const char *datafile);
-    virtual inline ModuleType name() { return PtrRead_k;}
+    virtual inline ModuleType name() {
+        return PtrRead_k;
+    }
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
@@ -111,19 +124,21 @@ class PtrRead : public BaseModule {
     SharedWire act_index_D, value_D, empty_D, read_sp;
 
     Memory PTRmem;
-    
+
     int num_lines;
 };
 
 class SpMatRead : public BaseModule {
-    public:
+ public:
     SpMatRead(int id);
     virtual ~SpMatRead();
     void init(const char *datafile);
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
-    virtual inline ModuleType name() { return SpMatRead_k;}
+    virtual inline ModuleType name() {
+        return SpMatRead_k;
+    }
 
     Register start_addr, end_addr, valid, value;
     Register start_addr_nextline, current_addr_shift;
@@ -149,14 +164,17 @@ class SpMatRead : public BaseModule {
 };
 
 class ArithmUnit : public BaseModule {
-    public:
+ public:
     ArithmUnit(int id);
-    virtual ~ArithmUnit() {}
+    virtual ~ArithmUnit() {
+    }
     void init(const char *datafile);
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
-    virtual inline ModuleType name() { return Arithm_k;}
+    virtual inline ModuleType name() {
+        return Arithm_k;
+    }
 
     Register patch_complete, index, value_code, act_value, valid;
     Register read_addr_last, result_mul;
@@ -173,7 +191,7 @@ class ArithmUnit : public BaseModule {
     SharedWire read_data_D;
 
     static uint32_t codebook[ARITHM_codebooksize];
-    static bool initialized; 
+    static bool initialized;
     int codebook_size;
 };
 

@@ -7,7 +7,8 @@
 bool ArithmUnit::initialized;
 uint32_t ArithmUnit::codebook[ARITHM_codebooksize];
 
-ArithmUnit::ArithmUnit(int id) : BaseModule(id) {
+ArithmUnit::ArithmUnit(int id)
+        : BaseModule(id) {
     codebook_size = ARITHM_codebooksize;
 
     valid = 0;
@@ -29,19 +30,18 @@ ArithmUnit::ArithmUnit(int id) : BaseModule(id) {
 }
 
 void ArithmUnit::init(const char* datafile) {
-    using namespace std;                                               
+    using namespace std;
     if (!initialized) {
-        ifstream file(datafile, ios::in|ios::binary);                      
-        if (file.is_open()) {                                              
+        ifstream file(datafile, ios::in | ios::binary);
+        if (file.is_open()) {
             int memory_size = codebook_size * sizeof(int32_t);
-            if (!file.read(reinterpret_cast<char*>(codebook), memory_size)) { 
-                LOG_ERROR("File size does not match!");                    
-            }                                                              
-            file.close();                                                  
-        }                                                                  
-        else {                                                             
-            LOG_ERROR("Unable to open the file!");                         
-        }                                                                  
+            if (!file.read(reinterpret_cast<char*>(codebook), memory_size)) {
+                LOG_ERROR("File size does not match!");
+            }
+            file.close();
+        } else {
+            LOG_ERROR("Unable to open the file!");
+        }
         initialized = true;
     }
 }
@@ -49,26 +49,25 @@ void ArithmUnit::init(const char* datafile) {
 void ArithmUnit::propagate() {
     // Stage 1
     read_addr = index + read_addr_last;
-    read_addr_last_D = (patch_complete)?0:(read_addr+1);
+    read_addr_last_D = (patch_complete) ? 0 : (read_addr + 1);
     valid_w = valid;
     act_value_w = act_value;
     value_decode_D = codebook[value_code];
-    
+
     // Stage 2
     bypass = valid_p_p && (read_addr_p == read_addr_p_p);
-    *(reinterpret_cast<float*>(&result_mul_D)) = 
-        *(reinterpret_cast<float*>(&value_decode)) * *(reinterpret_cast<float*>(&act_value_p));
+    *(reinterpret_cast<float*>(&result_mul_D)) = *(reinterpret_cast<float*>(&value_decode))
+            * *(reinterpret_cast<float*>(&act_value_p));
     valid_p_w = valid_p;
     read_addr_p_w = read_addr_p;
 
     // Stage 3
-    *(reinterpret_cast<float*>(&result_muladd)) = 
-    *(reinterpret_cast<float*>(&result_mul)) + *(reinterpret_cast<float*>(&read_data));
+    *(reinterpret_cast<float*>(&result_muladd)) = *(reinterpret_cast<float*>(&result_mul))
+            + *(reinterpret_cast<float*>(&read_data));
 
     write_enable = valid_p_p;
     write_addr = read_addr_p_p;
     write_data = result_muladd;
-
 
 }
 
@@ -95,14 +94,13 @@ void ArithmUnit::update() {
     valid_p_p = valid_p_w;
     if (bypass) {
         read_data = write_data;
-    }
-    else {
+    } else {
         read_data = *read_data_D;
     }
 }
 
 void ArithmUnit::connect(BaseModule *dependency) {
-    if (dependency->name() == SpMatRead_k) {                    
+    if (dependency->name() == SpMatRead_k) {
         if (dependency->id() != module_id) {
             LOG_ERROR("Module ID does not match!");
         }
@@ -112,11 +110,9 @@ void ArithmUnit::connect(BaseModule *dependency) {
         value_code_D = static_cast<SharedWire>(&(module_d->code));
         act_value_D = static_cast<SharedWire>(&(module_d->value_next));
         valid_D = static_cast<SharedWire>(&(module_d->valid_next));
-    }
-    else if (dependency->name() == ActRW_k) {
+    } else if (dependency->name() == ActRW_k) {
         ActRW *module_d = static_cast<ActRW*>(dependency);
         read_data_D = static_cast<SharedWire>(module_d->read_data_arithm + module_id);
     }
 }
-        
 

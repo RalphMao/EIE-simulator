@@ -6,7 +6,8 @@
 #include<cstring>
 using namespace std;
 
-NzeroFetch::NzeroFetch() : BaseModule() {
+NzeroFetch::NzeroFetch()
+        : BaseModule() {
     // Set parameters
     buffer_size = NZFETCH_buffersize;
 
@@ -55,7 +56,7 @@ void NzeroFetch::propagate() {
         }
     }
 
-    pack_addr = (find)?pack_addr : (NUM_PE - 1);
+    pack_addr = (find) ? pack_addr : (NUM_PE - 1);
     value_buffer = acts_per_bank[pack_addr];
     index_buffer = reg_addr * NUM_PE + pack_addr;
 
@@ -97,11 +98,10 @@ void NzeroFetch::connect(BaseModule *dependency) {
     if (dependency->name() == ActRW_k) {
         ActRW* module_d = static_cast<ActRW*>(dependency);
         reg_addr_D = static_cast<SharedWire>(&(module_d->reg_addr_w));
-        for (int i=0; i < NUM_PE; i++) {
+        for (int i = 0; i < NUM_PE; i++) {
             acts_per_bank_D[i] = static_cast<SharedWire>(module_d->acts_per_bank + i);
         }
-    }
-    else if (dependency->name() == PtrRead_k) {
+    } else if (dependency->name() == PtrRead_k) {
         PtrRead* module_d = static_cast<PtrRead*>(dependency);
         valid_ptr[module_d->id()] = static_cast<SharedWire>(&(module_d->valid));
     }
