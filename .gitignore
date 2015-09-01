@@ -1,4 +1,5 @@
 *.dat
+*.o
 build
 data
 *.bin
@@ -6,7 +7,5 @@ data
 .cproject
 .project
 .settings/
-src/.cproject
-src/.project
-src/.settings/
 src/params.h
+simulation

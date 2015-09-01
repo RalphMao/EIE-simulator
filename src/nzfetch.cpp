@@ -2,6 +2,7 @@
 #include"utils.h"
 #include"module.h"
 #include<iostream>
+#include<string.h>
 
 using namespace std;
 
