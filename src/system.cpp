@@ -49,12 +49,12 @@ void print_v() {
     P_V(ptr[NUM_PE-1]->start_addr);
     P_V(ptr[NUM_PE-1]->end_addr);
     P_V(ptr[NUM_PE-1]->valid);
+    P_V(ptr[NUM_PE-1]->current_addr);
 
-    P_V(spm[NUM_PE-1]->read);
-    P_V(spm[NUM_PE-1]->memory_addr_shift);
     P_V(spm[NUM_PE-1]->index);
     P_V(spm[NUM_PE-1]->code);
-    P_V(spm[NUM_PE-1]->valid_next);
+    P_V(spm[NUM_PE-1]->read_enable);
+    P_V(spm[NUM_PE-1]->patch_complete);
 
     P_V(aru[NUM_PE-1]->read_addr);
     P_V(*(reinterpret_cast<float*>(&aru[3]->result_muladd)));
