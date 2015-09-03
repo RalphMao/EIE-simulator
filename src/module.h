@@ -179,19 +179,19 @@ class ArithmUnit : public BaseModule {
         return Arithm_k;
     }
 
-    Register patch_complete, index, value_code, act_value, valid;
-    Register read_addr_last, result_mul;
-    Register read_addr_p, value_decode, act_value_p, valid_p, read_data;
-    Register read_addr_p_p, valid_p_p;
+    SharedWire patch_complete_D, index_D, value_code_D, act_value_D, valid_D;
+    SharedWire read_data_D;
 
-    Wire read_addr, value_decode_D, read_addr_last_D;
+    Register patch_complete, index, value_code, act_value, valid;
+    Register read_addr_last;
+    Register read_addr_p, value_decode, act_value_p, valid_p;
+    Register read_data, result_mul, valid_p_p, read_addr_p_p;
+
+    Wire read_addr, read_addr_last_D, value_decode_D;
     Wire value_to_add, result_muladd, result_mul_D;
     Wire bypass;
     Wire write_enable, write_addr, write_data;
     Wire valid_w, valid_p_w, read_addr_p_w, act_value_w;
-
-    SharedWire patch_complete_D, index_D, value_code_D, act_value_D, valid_D;
-    SharedWire read_data_D;
 
     static uint32_t codebook[ARITHM_codebooksize];
     static bool initialized;
