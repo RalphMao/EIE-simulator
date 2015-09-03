@@ -14,19 +14,12 @@ SpMatRead::SpMatRead(int id)
     int memory_size = unit_line * num_lines * sizeof(int32_t) * 2;
     WImem = static_cast<Memory>(new uint32_t[memory_size]);
 
-    start_addr = 0;
-    end_addr = 0;
+    memory_addr = 0;
+    read_enable = 0;
+    memory_shift = 0;
+    patch_complete = 1;
     valid = 0;
     value = 0;
-
-    start_addr_nextline = 0;
-    current_addr_shift = 0;
-    patch_complete_p = 1;
-    line_complete_p = 1;
-    memory_addr_shift_p = 0;
-    for (int i = 0; i < 2 * unit_line; i++) {
-        data_read[i] = 0;
-    }
 
 }
 
@@ -49,10 +42,42 @@ void SpMatRead::init(const char *datafile) {
         if (!file.read(reinterpret_cast<char*>(WImem), file_size)) {
             LOG_ERROR("File size does not match!");
         }
+        for (int i = 0; i < 2 * unit_line; i++) {
+            data_read[i] = WImem[i];
+        }
+
         file.close();
     } else {
         LOG_ERROR("Unable to open the file!");
     }
+}
+
+void SpMatRead::propagate() {
+
+    // Memory access
+    if (read_enable) {
+        for (int i = 0; i < 2 * unit_line; i++) {
+            data_read[i] = WImem[memory_addr * unit_line * 2 + i];
+        }
+    }
+    code = data_read[memory_shift * 2];
+    index = data_read[memory_shift * 2 + 1];
+
+    value_w = value;
+    valid_w = valid;
+    patch_complete_w = patch_complete;
+
+}
+
+void SpMatRead::update() {
+    if (*valid_D) {
+        patch_complete = *patch_complete_D;
+        memory_shift = *memory_shift_D;
+        memory_addr = *memory_addr_D;
+        value = *value_D;
+    }
+    read_enable = *read_enable_D;
+    valid = *valid_D;
 }
 
 void SpMatRead::connect(BaseModule *dependency) {
@@ -63,64 +88,14 @@ void SpMatRead::connect(BaseModule *dependency) {
     if (dependency->name() == PtrRead_k) {
         PtrRead *module_d = static_cast<PtrRead*>(dependency);
 
-        start_addr_D = static_cast<SharedWire>(&(module_d->start_addr));
-        end_addr_D = static_cast<SharedWire>(&(module_d->end_addr));
+        patch_complete_D = static_cast<SharedWire>(&(module_d->patch_complete));
+        memory_shift_D = static_cast<SharedWire>(&(module_d->memory_shift));
+        memory_addr_D = static_cast<SharedWire>(&(module_d->memory_addr));
+        read_enable_D = static_cast<SharedWire>(&(module_d->read_spmat));
         valid_D = static_cast<SharedWire>(&(module_d->valid));
         value_D = static_cast<SharedWire>(&(module_d->value_w));
     } else {
         LOG_ERROR("Unknown Module Type!");
-    }
-}
-
-void SpMatRead::propagate() {
-    addr = (patch_complete_p) ? start_addr : start_addr_nextline * unit_line;
-    memory_addr = addr / unit_line;
-    addr_residue = addr % unit_line;
-    memory_shift = (line_complete_p) ? addr_residue : current_addr_shift;
-    memory_addr_shift = memory_addr * unit_line + memory_shift;
-
-    start_addr_nextline_D = memory_addr + 1;
-    current_addr_shift_D = memory_shift + 1;
-
-    // Memory access
-    if (valid && line_complete_p) {
-        for (int i = 0; i < 2 * unit_line; i++) {
-            data_read[i] = WImem[memory_addr * unit_line * 2 + i];
-        }
-    }
-    code = data_read[memory_shift * 2];
-    index = data_read[memory_shift * 2 + 1];
-
-    value_next = value;
-
-    // valid_next = valid && (memory_addr_shift_p != memory_addr_shift); 
-    valid_next = valid;
-
-    // Decision
-    line_last = memory_addr == (end_addr / unit_line);
-    shift_equal = memory_shift == (end_addr % unit_line);
-    line_complete = (line_last) ? shift_equal : ((memory_shift + 1) == static_cast<uint32_t>(unit_line));
-    patch_complete = line_last && shift_equal;
-
-    read = patch_complete || !valid;
-}
-
-void SpMatRead::update() {
-    if (valid) {
-        line_complete_p = line_complete;
-        current_addr_shift = current_addr_shift_D;
-        memory_addr_shift_p = memory_addr_shift;
-        if (line_complete) {
-            start_addr_nextline = start_addr_nextline_D;
-            patch_complete_p = patch_complete;
-        }
-    }
-
-    if (read) {
-        start_addr = *start_addr_D;
-        end_addr = *end_addr_D;
-        valid = *valid_D;
-        value = *value_D;
     }
 }
 

@@ -105,11 +105,11 @@ void ArithmUnit::connect(BaseModule *dependency) {
             LOG_ERROR("Module ID does not match!");
         }
         SpMatRead *module_d = static_cast<SpMatRead*>(dependency);
-        patch_complete_D = static_cast<SharedWire>(&(module_d->patch_complete));
+        patch_complete_D = static_cast<SharedWire>(&(module_d->patch_complete_w));
         index_D = static_cast<SharedWire>(&(module_d->index));
         value_code_D = static_cast<SharedWire>(&(module_d->code));
-        act_value_D = static_cast<SharedWire>(&(module_d->value_next));
-        valid_D = static_cast<SharedWire>(&(module_d->valid_next));
+        act_value_D = static_cast<SharedWire>(&(module_d->value_w));
+        valid_D = static_cast<SharedWire>(&(module_d->valid_w));
     } else if (dependency->name() == ActRW_k) {
         ActRW *module_d = static_cast<ActRW*>(dependency);
         read_data_D = static_cast<SharedWire>(module_d->read_data_arithm + module_id);

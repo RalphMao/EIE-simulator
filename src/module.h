@@ -95,9 +95,10 @@ class NzeroFetch : public BaseModule {
     Register pos_read[NUM_PE], pos_write[NUM_PE];
     Register act_index[NUM_PE][NZFETCH_buffersize], value[NUM_PE][NZFETCH_buffersize];
     Wire act_index_output[NUM_PE], value_output[NUM_PE];
+    Wire ptr_odd_addr[NUM_PE], ptr_even_addr[NUM_PE], index_flag[NUM_PE];
     Wire empty[NUM_PE], full[NUM_PE];
     Wire pos_read_D[NUM_PE], pos_write_D[NUM_PE];
-    SharedWire read_sp[NUM_PE], valid_ptr[NUM_PE];
+    SharedWire read_ptr[NUM_PE];
 
     int buffer_size;
 #if DEBUG == 1
@@ -118,14 +119,18 @@ class PtrRead : public BaseModule {
     virtual void update();
     virtual void connect(BaseModule *dependency);
 
-    Register act_index, value, empty;
+    Register ptr_odd_addr, ptr_even_addr, index_flag, value, empty;
     Wire start_addr, end_addr, valid, value_w;
     Wire index_odd, index_even;
-    SharedWire act_index_D, value_D, empty_D, read_sp;
+    // New
+    Register start_addr_p, memory_addr_p, patch_complete_p;
+    Wire patch_complete, read_ptr, read_spmat;
+    Wire current_addr, memory_addr, memory_shift;
+    SharedWire ptr_odd_addr_D, ptr_even_addr_D, index_flag_D, value_D, empty_D;
 
     Memory PTRmem;
 
-    int num_lines;
+    int num_lines, unit_line;
 };
 
 class SpMatRead : public BaseModule {
@@ -140,21 +145,12 @@ class SpMatRead : public BaseModule {
         return SpMatRead_k;
     }
 
-    Register start_addr, end_addr, valid, value;
-    Register start_addr_nextline, current_addr_shift;
-    Register patch_complete_p, line_complete_p;
-    Register memory_addr_shift_p;
+    Register memory_addr, read_enable, memory_shift, patch_complete, valid, value;
 
-    Wire index, code, valid_next, value_next;
-    Wire start_addr_nextline_D, current_addr_shift_D;
-    Wire patch_complete, line_complete, line_last, shift_equal;
-    Wire memory_addr, memory_shift;
-    Wire addr, addr_residue;
-    Wire memory_addr_shift;
+    Wire index, code, valid_w, value_w, patch_complete_w;
     Wire data_read[SPMAT_unit_line * 2];
-    Wire read;
 
-    SharedWire start_addr_D, end_addr_D, valid_D, value_D;
+    SharedWire memory_addr_D, read_enable_D, memory_shift_D, patch_complete_D, valid_D, value_D;
 
     Memory WImem;
 

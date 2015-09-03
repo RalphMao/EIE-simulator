@@ -42,6 +42,10 @@ void NzeroFetch::propagate() {
         value_output[i] = value[i][pos_read[i]];
         act_index_output[i] = act_index[i][pos_read[i]];
 
+        index_flag[i] = act_index_output[i] % 2;
+        ptr_odd_addr[i] = act_index_output[i] / 2;
+        ptr_even_addr[i] = (act_index_output[i] + 1) / 2;
+
 #if DEBUG == 1
         if (full[i]) full_idx = i;
 #endif
@@ -88,7 +92,7 @@ void NzeroFetch::update() {
     }
 
     for (int i = 0; i < NUM_PE; i++) {
-        if (!empty[i] && (!*(valid_ptr[i]) || *(read_sp[i]))) {
+        if (!empty[i] && *(read_ptr[i])) {
             pos_read[i] = pos_read_D[i];
         }
     }
@@ -103,10 +107,8 @@ void NzeroFetch::connect(BaseModule *dependency) {
         }
     } else if (dependency->name() == PtrRead_k) {
         PtrRead* module_d = static_cast<PtrRead*>(dependency);
-        valid_ptr[module_d->id()] = static_cast<SharedWire>(&(module_d->valid));
-    }
-    if (dependency->name() == SpMatRead_k) {
-        SpMatRead* module_d = static_cast<SpMatRead*>(dependency);
-        read_sp[module_d->id()] = static_cast<SharedWire>(&(module_d->read));
+        read_ptr[module_d->id()] = static_cast<SharedWire>(&(module_d->read_ptr));
+    } else {
+        LOG_ERROR("Unknow module!");
     }
 }
