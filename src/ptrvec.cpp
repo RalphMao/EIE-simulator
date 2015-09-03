@@ -19,7 +19,7 @@ PtrRead::PtrRead(int id)
     empty = 1;
 
     start_addr_p = 0;
-    memory_addr_p = 0;
+    memory_addr_p = 0xffff;
     patch_complete_p = 1;
 }
 
@@ -62,6 +62,7 @@ void PtrRead::propagate() {
     memory_shift = current_addr % unit_line;
     read_spmat = (memory_addr != memory_addr_p) && valid;
 
+    patch_complete = current_addr == end_addr;
     read_ptr = !valid || patch_complete;
 
 }
@@ -76,6 +77,12 @@ void PtrRead::update() {
         }
         empty = *empty_D;
     }
+    if (valid) {
+        start_addr_p = current_addr + 1;
+        patch_complete_p = patch_complete;
+        memory_addr_p = memory_addr;
+    }
+
 }
 
 void PtrRead::connect(BaseModule *dependency) {
