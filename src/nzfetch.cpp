@@ -2,8 +2,8 @@
 #include"utils.h"
 #include"module.h"
 #include<iostream>
+#include<string.h>
 
-#include<cstring>
 using namespace std;
 
 NzeroFetch::NzeroFetch()

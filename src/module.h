@@ -20,6 +20,7 @@ class BaseModule {
     }
     virtual ~BaseModule() {
     }
+    virtual void init() = 0;
     virtual void propagate() = 0;
     virtual void update() = 0;
     virtual void connect(BaseModule *dependency) = 0;
@@ -37,8 +38,8 @@ class ActRW : public BaseModule {
 
     ActRW();
     ~ActRW();
-    void init(const char* datafile);
     void set_state(int state_t, int end_addr_t, int which_t, int bias_t);
+    virtual void init();
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
@@ -76,6 +77,8 @@ class NzeroFetch : public BaseModule {
     NzeroFetch();
     virtual ~NzeroFetch() {
     }
+    virtual void init() {
+    }
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
@@ -111,10 +114,10 @@ class PtrRead : public BaseModule {
  public:
     PtrRead(int id);
     virtual ~PtrRead();
-    void init(const char *datafile);
     virtual inline ModuleType name() {
         return PtrRead_k;
     }
+    virtual void init();
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
@@ -137,7 +140,7 @@ class SpMatRead : public BaseModule {
  public:
     SpMatRead(int id);
     virtual ~SpMatRead();
-    void init(const char *datafile);
+    virtual void init();
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);
@@ -164,7 +167,7 @@ class ArithmUnit : public BaseModule {
     ArithmUnit(int id);
     virtual ~ArithmUnit() {
     }
-    void init(const char *datafile);
+    virtual void init();
     virtual void propagate();
     virtual void update();
     virtual void connect(BaseModule *dependency);

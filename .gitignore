@@ -1,5 +1,11 @@
 *.dat
+*.o
 build
 data
 *.bin
 *.mat
+.cproject
+.project
+.settings/
+src/params.h
+simulation

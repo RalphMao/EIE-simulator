@@ -10,13 +10,10 @@ enum ModuleType {
     PtrRead_k,
     SpMatRead_k,
     Arithm_k,
-    // WDecode_k,
-    // AddMulUnit_k,
-    // Control_k,
     Base_k
 };
 
-const int TYPES = Base_k;
+const int TYPES = Base_k; //number of types: equal to the last element's number
 const int NumModules[TYPES] = {
     1,
     1,
@@ -41,11 +38,11 @@ const int topology[TYPES][TYPES] = {
 
 #define MAX_FILELENGTH 20
 const char datafile[TYPES][MAX_FILELENGTH] = {
-    "act",
+    "data/act.dat",
     "",
-    "ptr/ptr",
-    "spm/spm",
-    "arithm",
+    "data/ptr/ptr",
+    "data/spm/spm",
+    "data/arithm.dat",
 };
 
 #endif
