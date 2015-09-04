@@ -33,7 +33,7 @@ void SpMatRead::init() {
     filename += to_string(id());
     filename += ".dat";
     ifstream file(filename.c_str(), ios::in | ios::binary);
-    ifstream file_test(filename, ios::in | ios::binary | ios::ate);
+    ifstream file_test(filename.c_str(), ios::in | ios::binary | ios::ate);
     if (file.is_open()) {
         int memory_size = unit_line * num_lines * sizeof(int32_t) * 2;
         int file_size = static_cast<int>(file_test.tellg());

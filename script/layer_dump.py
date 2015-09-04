@@ -109,23 +109,25 @@ def get_csc(codes_W, codes_b, bank_num=64, max_jump = 16):
                 has_bias[idx] = True
             else:
                 ptr_tmp = np.zeros(((tmp.shape[1])/bank_num+1)*bank_num+2, dtype = np.uint32) # take bias into consideration
-                
+            
+            # weights    
             spm_tmp = np.zeros(weights.size, dtype = np.uint32) # large enough
             ind_tmp = np.ones(weights.size, dtype = np.uint32) * (max_jump-1)# large enough
             for col in range(tmp.shape[1]):
                 loc = np.where(tmp[:,col] != 0)[0]
                 if len(loc) > 0:
-                    distance_loc = np.append(loc[0], np.diff(loc)-1)
+                    distance_loc = np.append(loc[0], np.diff(loc)-1)  #jump 1 encode to 0
                     zeros = distance_loc/max_jump
-                    idx_vec = np.cumsum(zeros+1)-1
-                    ptr_tmp[col+1] = idx_vec[-1]+1 + ptr_tmp[col]
-                    spm_tmp[ptr_tmp[col] + idx_vec] = tmp[loc, col]
-                    ind_tmp[ptr_tmp[col] + idx_vec] = distance_loc % max_jump
+                    idx_vec = np.cumsum(zeros+1)-1  #add the element itself. first one need -1
+                    ptr_tmp[col+1] = idx_vec[-1]+1 + ptr_tmp[col]             #ptr
+                    spm_tmp[ptr_tmp[col] + idx_vec] = tmp[loc, col]           #code
+                    ind_tmp[ptr_tmp[col] + idx_vec] = distance_loc % max_jump #index
                 else:
                     ptr_tmp[col+1] = ptr_tmp[col]
             
             ptr_tmp[tmp.shape[1]:-1] = ptr_tmp[tmp.shape[1]]
 
+            # bias
             loc = np.where(tmp_bias != 0)[0]
             if len(loc) > 0:
                 distance_loc = np.append(loc[0], np.diff(loc)-1)
@@ -145,7 +147,7 @@ def get_csc(codes_W, codes_b, bank_num=64, max_jump = 16):
         layer_shift[layer_id+1] = ptr[0].size - 1
 
 
-    return ptr, spm, ind, layer_shift[:-1]
+    return ptr, spm, ind, layer_shift[:-1] #pointer to the start address for ptr of each layer
 
 
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
@@ -208,7 +210,7 @@ const int ACT_length = {{act_length}};
 '''
 ###################################################
 # Configuration
-spm_unitsize = 16
+spm_unitsize = 16  # 16 code + 16 index
 buffer_size = 4
 
 ##################################################
