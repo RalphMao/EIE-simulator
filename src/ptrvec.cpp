@@ -46,8 +46,11 @@ void PtrRead::init() {
 }
 
 void PtrRead::propagate() {
-    index_odd = PTRmem[ptr_odd_addr * 2 + 1];
-    index_even = PTRmem[ptr_even_addr * 2];
+    if (read_enable) {
+        index_odd = PTRmem[ptr_odd_addr * 2 + 1];
+        index_even = PTRmem[ptr_even_addr * 2];
+        read_times++;
+    }
     if (index_flag) {
         start_addr = index_odd;
         end_addr = index_even - 1;
@@ -71,6 +74,7 @@ void PtrRead::propagate() {
 }
 
 void PtrRead::update() {
+    read_enable = read_ptr && !*empty_D;
     if (read_ptr) {
         if (!*empty_D) {
             ptr_odd_addr = *ptr_odd_addr_D;

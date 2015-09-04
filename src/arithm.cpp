@@ -83,9 +83,7 @@ void ArithmUnit::update() {
     // Stage 2
     if (valid_w) {
         read_addr_last = read_addr_last_D;
-    } else {
-        LOG("not valid!");
-    }
+    } 
     read_addr_p = read_addr;
     value_decode = value_decode_D;
     act_value_p = act_value_w;

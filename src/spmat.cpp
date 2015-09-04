@@ -62,6 +62,7 @@ void SpMatRead::propagate() {
         for (int i = 0; i < 2 * unit_line; i++) {
             data_read[i] = WImem[memory_addr * unit_line * 2 + i];
         }
+        read_times++;
     }
     code = data_read[memory_shift * 2];
     index = data_read[memory_shift * 2 + 1];

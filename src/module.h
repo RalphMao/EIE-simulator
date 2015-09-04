@@ -3,11 +3,7 @@
 
 #include<stdint.h>
 #include"configs.h"
-
-typedef uint32_t Register;
-typedef uint32_t Wire;
-typedef uint32_t* Memory;
-typedef const uint32_t* SharedWire;
+#include"components.h"
 
 class BaseModule {
  public:
@@ -122,7 +118,7 @@ class PtrRead : public BaseModule {
     virtual void update();
     virtual void connect(BaseModule *dependency);
 
-    Register ptr_odd_addr, ptr_even_addr, index_flag, value, empty;
+    Register ptr_odd_addr, ptr_even_addr, index_flag, value, empty, read_enable;
     Wire start_addr, end_addr, valid, value_w;
     Wire index_odd, index_even;
     // New
@@ -134,6 +130,7 @@ class PtrRead : public BaseModule {
     Memory PTRmem;
 
     int num_lines, unit_line;
+    int read_times;
 };
 
 class SpMatRead : public BaseModule {
@@ -159,6 +156,7 @@ class SpMatRead : public BaseModule {
 
     int unit_line, num_lines;
     int index_bits, weights_bits;
+    int read_times;
 
 };
 
