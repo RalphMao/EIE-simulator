@@ -208,7 +208,7 @@ const int ACT_length = {{act_length}};
 '''
 ###################################################
 # Configuration
-spm_unitsize = 8
+spm_unitsize = 16
 buffer_size = 4
 
 ##################################################
