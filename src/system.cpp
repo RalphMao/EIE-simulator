@@ -190,7 +190,20 @@ int main() {
 #if DEBUG == 1
     LOG("Efficiency:" + to_string(double(act[0]->valid_write_times) / system.cycles / NUM_PE));
     system.output("data/output.dat");
+#if PROFILE == 1
+    int total_ptr = 0;
+    int total_spm = 0;
+    for (int i=0; i < NUM_PE; i++) {
+        total_ptr += ptr[i]->read_times;
+        total_spm += spm[i]->read_times;
+    }
+    P_V(total_ptr);
+    P_V(total_spm);
+    P_V(nzf[0]->index_buffer.changes);
+
 #endif
+#endif
+
     return 0;
 }
 

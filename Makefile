@@ -11,7 +11,7 @@ DEBUG := 1
 PROFILE := 1
 
 ifeq ($(DEBUG), 1)
-    CFLAGS := -Wall -g -std=c++11 -O0 -Wuninitialized -Wfatal-errors -D DEBUG=1 -D PROFILE=$(PROFILE)
+    CFLAGS := -Wall -g -std=c++11 -O2 -Wuninitialized -Wfatal-errors -D DEBUG=1 -D PROFILE=$(PROFILE)
 else
     CFLAGS := -std=c++11 -O3 -D PROFILE=$(PROFILE)
 endif

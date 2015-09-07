@@ -53,7 +53,7 @@ void ArithmUnit::propagate() {
     read_addr_last_D = (patch_complete) ? 0 : (read_addr + 1);
     value_decode_D = codebook[value_code];
     act_value_w = act_value;
-    valid_w = valid;
+    valid_w = valid && (value_code != 0);
 
     // Stage 2
     bypass = valid_p_p && (read_addr_p == read_addr_p_p);

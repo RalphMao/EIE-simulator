@@ -22,6 +22,7 @@ PtrRead::PtrRead(int id)
     start_addr_p = 0;
     memory_addr_p = 0xffff;
     patch_complete_p = 1;
+    read_times = 0;
 }
 
 PtrRead::~PtrRead() {

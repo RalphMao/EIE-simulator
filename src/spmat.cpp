@@ -21,6 +21,7 @@ SpMatRead::SpMatRead(int id)
     patch_complete = 1;
     valid = 0;
     value = 0;
+    read_times = 0;
 
 }
 
