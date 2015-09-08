@@ -24,8 +24,8 @@ const int NumModules[TYPES] = {
 
 enum ConnectType {
     NoConnect = 0,
-    Connect_by_id,
-    Connect_all
+    Connect_by_id, // Only two modules with the same id will be connected
+    Connect_all // Modules will be connected regardless of id
 };
 
 const int topology[TYPES][TYPES] = {
@@ -34,7 +34,7 @@ const int topology[TYPES][TYPES] = {
     {0, 2, 0, 0, 0},
     {0, 0, 1, 0, 0},
     {2, 0, 0, 1, 0},
-};
+}; // Single-direction connection. See ConnectType.
 
 #define MAX_FILELENGTH 20
 const char datafile[TYPES][MAX_FILELENGTH] = {
