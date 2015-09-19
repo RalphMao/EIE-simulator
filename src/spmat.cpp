@@ -59,8 +59,8 @@ void SpMatRead::propagate() {
 
     // Memory access
     if (read_enable) {
-        for (int i = 0; i < 2 * unit_line; i++) {
-            data_read[i] = WImem[memory_addr * unit_line * 2 + i];
+        for (int i = 0; i < unit_line * 2; i++) {
+            data_read[i] = WImem[memory_addr * (unit_line * 2) + i];
         }
     }
     code = data_read[memory_shift * 2];
