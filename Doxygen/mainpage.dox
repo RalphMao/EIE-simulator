@@ -1,0 +1,11 @@
+/**
+  \mainpage DNN Simulator
+This simulator is aimed to model the RTL behavior of synchronous circuits. Currently it is able to simulate one-layer computation. There are three main features of this simulator:
+<p>
+- Modularity. The overall system is made up of modules. A module is not necessarily a pipeline stage, but an entity that achieves trade-off of logic-simplicity and code-simplicity.
+- Abstraction. All modules are abstracted as objects with two functions: Propagate and Update, corresponding to the behavior of combinatorial part and the flip-flop part.
+- Simplification. Some sophisticated combinatorial logics are replaced with simple C++ implementations.
+</p>
+<p> This project is ported on: git@bitbucket.org:ralph_mao/dnn_simulator.git. </p>
+<p> Author: Huizi Mao, Song Han @ Stanford </p>
+*/
