@@ -52,8 +52,9 @@ void ArithmUnit::propagate() {
     read_addr = index + read_addr_last;
     read_addr_last_D = (patch_complete) ? 0 : (read_addr + 1);
     value_decode_D = codebook[value_code];
+    value_code_w = value_code;
     act_value_w = act_value;
-    valid_w = valid && (value_code != 0);
+    valid_w = valid;
 
     // Stage 2
     bypass = valid_p_p && (read_addr_p == read_addr_p_p);
@@ -87,7 +88,7 @@ void ArithmUnit::update() {
     read_addr_p = read_addr;
     value_decode = value_decode_D;
     act_value_p = act_value_w;
-    valid_p = valid_w;
+    valid_p = valid_w && value_code_w != 0;
 
     // Stage 3
     read_addr_p_p = read_addr_p_w;
