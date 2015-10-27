@@ -158,6 +158,14 @@ else:
     layers = ['fc7']
     bank_num = 64
 
+dump_codes=True
+if dump_codes:
+    layers = filter(lambda x:'conv' in x or 'fc' in x, net.params.keys())
+    codebook = kmeans(net, layers)
+    codes_W, codes_b = get_codes(net, codebook)
+    pickle.dump(codes_W, open('codes.pkl','wb'))
+    sys.exit()
+
 codebook = kmeans(net, layers)
 codes_W, codes_b = get_codes(net, codebook)
 ptr, spm, ind, layer_shift= get_csc(codes_W, codes_b, bank_num = bank_num)
