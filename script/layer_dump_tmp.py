@@ -84,16 +84,14 @@ def get_codes(net, codebook):
     return codes_W, codes_b
 
 def get_csc_single_nobias(weights, bank_num = 64, max_jump = 16):
+    print "===============CSC Formatting===================="
     ptr = [np.array([0], dtype = np.uint32)] * bank_num
     spm = [np.array([], dtype = np.uint32)] * bank_num
     ind= [np.array([], dtype = np.uint32)] * bank_num
 
     for idx in range(bank_num):
+        print "Bank:", idx
         tmp = np.take(weights, range(idx, weights.shape[0], bank_num), axis=0)
-        # bank_weights[idx,:tmp.shape[0]] = tmp
-        # tmp_id = np.where(tmp == 0)
-        # x_id = tmp_id[0]
-        # y_id = tmp_id[1]
         ptr_tmp = np.zeros(tmp.shape[1]+1, dtype = np.uint32) # take bias into consideration
         
         # weights    
@@ -111,7 +109,7 @@ def get_csc_single_nobias(weights, bank_num = 64, max_jump = 16):
             else:
                 ptr_tmp[col+1] = ptr_tmp[col]
 
-        ptr[idx] = np.append(ptr[idx], ptr_tmp)
+        ptr[idx] = np.append(ptr[idx], ptr_tmp[1:])
         spm[idx] = np.append(spm[idx], spm_tmp[:ptr_tmp[-1]])
         ind[idx] = np.append(ind[idx], ind_tmp[:ptr_tmp[-1]])
 
@@ -119,12 +117,14 @@ def get_csc_single_nobias(weights, bank_num = 64, max_jump = 16):
 
 
 caffe.set_mode_cpu()   
-options = argparse.parse_args()
+options = parser.parse_args()
 option = options.net
 layer = options.layer
 bank_num = options.bank_num
 C_simulation = options.c_simulation
 
+simulator_root = os.environ['SIMULATOR_PATH']
+data_dir = simulator_root + '/data/%s_%s_%d'%(option, layer, bank_num)
 if option == 'lenet5':                                             
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'       
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'     
@@ -149,8 +149,6 @@ weights = codes_W[layer]
 
 ptr, spm, ind = get_csc_single_nobias(weights, bank_num = bank_num)
 
-simulator_root = os.environ['SIMULATOR_PATH']
-data_dir = simulator_root + '/data/%s_%s_%d'%(net, layer, bank_num)
 
 os.system("rm -rf " + data_dir)
 os.system("mkdir " + data_dir)
@@ -159,6 +157,7 @@ os.system("mkdir " + data_dir + '/spm')
 
 max_memsize = 0
 mem_a = [0] * bank_num
+total_nonzeros = 0
 for idx in range(bank_num):
     with open("%s/ptr/ptr%d.dat"%(data_dir, idx), 'wb') as f:
         ptr[idx].tofile(f) # Ptr is stored by 32-bit 
@@ -169,14 +168,20 @@ for idx in range(bank_num):
         if C_simulation:
             mem = np.transpose(np.array([spm[idx],ind[idx]])).flatten()
         else:
-            mem = spm[idx].astype(np.uint8) + ind[idx].astype(np.uint8) << 4
+            mem = spm[idx].astype(np.uint8) + (ind[idx].astype(np.uint8) << 4)
 
         if (mem.size > max_memsize):
             max_memsize = mem.size
-        mem_a[idx] = mem
+        total_nonzeros += np.count_nonzero(spm[idx])
+        mem_a[idx] = mem.size
         mem.tofile(f)
 
-with open("%s/data/arithm.dat"%simulator_root, 'wb') as f:
+total_memsize = sum(mem_a)
+print "Max memory size of one bank:", max_memsize
+print "Total memory size :", total_memsize
+print "Total Nonzeros:",total_nonzeros 
+
+with open("%s/arithm.dat"%data_dir, 'wb') as f:
     if C_simulation:
         codebook_t = np.array(codebook[layer], dtype=np.float32)
     else: # 16-bit fixed-point, range in [-1,1]
@@ -213,12 +218,12 @@ spm_unitsize = 16  # 16 code + 16 index
 buffer_size = 4
 
 ##################################################
-batch_size = net.blobs['conv1'].data.shape[0]
-for i in range(idx / batch_size+1):
+batch_size = net.blobs[layer].data.shape[0]
+for i in range(1):
     net.forward()
 
-one_act = 1 # For debug
 
+'''
 if option == 'lenet5':
     if one_act:
         act = np.array([2.0, 0.0, 1.0], dtype=np.float32)
@@ -235,6 +240,17 @@ if option == "lenet5":
 else:
     max_inputsize = 4096
 act_length = act.size
+'''
+
+all_layers = net.blobs.keys()
+layer_previous = all_layers[all_layers.index(layer)-1]
+if len(net.blobs[layer_previous].data.shape) == 1: # In case of lenet300-100
+    layer_previous = 'data'
+act = net.blobs[layer_previous].data[0].flatten()
+act_relu = (act + abs(act)) / 2
+ground_truth = np.dot(net.params[layer][0].data, act_relu)
+act_length = act.size
+max_inputsize = act_length
 
 with open("%s/act.dat"%data_dir, 'wb') as f:
     if C_simulation:

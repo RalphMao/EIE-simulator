@@ -156,15 +156,7 @@ if option == 'lenet5':
     bank_num = 4
 else:
     layers = ['fc7']
-    bank_num = 64
-
-dump_codes=True
-if dump_codes:
-    layers = filter(lambda x:'conv' in x or 'fc' in x, net.params.keys())
-    codebook = kmeans(net, layers)
-    codes_W, codes_b = get_codes(net, codebook)
-    pickle.dump(codes_W, open('codes.pkl','wb'))
-    sys.exit()
+    bank_num = 32
 
 codebook = kmeans(net, layers)
 codes_W, codes_b = get_codes(net, codebook)
@@ -223,7 +215,7 @@ buffer_size = 4
 
 ##################################################
 batch_size = net.blobs['conv1'].data.shape[0]
-for i in range(idx / batch_size+1):
+for i in range(1):
     net.forward()
 
 one_act = 1 # For debug
@@ -236,8 +228,8 @@ if option == 'lenet5':
         act = net.blobs['pool2'].data[idx % batch_size]
         ground_truth = net.blobs['ip1'].data[idx % batch_size]
 else:
-    act = net.blobs['fc6'].data[idx % batch_size]
-    ground_truth = net.blobs['fc7'].data[idx % batch_size]
+    act = net.blobs['fc6'].data[0]
+    ground_truth = net.blobs['fc7'].data[0]
 
 if option == "lenet5":
     max_inputsize = 1024

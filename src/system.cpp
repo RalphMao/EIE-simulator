@@ -172,7 +172,7 @@ void System::output(const char* output_file) {
 int main() {
     System system;
     ActRW *ControlUnit = static_cast<ActRW*>(system.modules[0]);
-    ControlUnit->set_state(1, ACT_length, 0, 1);
+    ControlUnit->set_state(1, ACT_length, 0, 0);
     system.init();
 
     LOG("System initialization done");
