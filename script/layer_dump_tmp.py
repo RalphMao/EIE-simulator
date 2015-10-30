@@ -147,7 +147,11 @@ codebook = kmeans(net, [layer])
 codes_W, codes_b = get_codes(net, codebook)
 weights = codes_W[layer]
 
-ptr, spm, ind = get_csc_single_nobias(weights, bank_num = bank_num)
+if option == 'vgg':
+    max_jump = 32
+else:
+    max_jump = 16
+ptr, spm, ind = get_csc_single_nobias(weights, bank_num = bank_num, max_jump = max_jump)
 
 
 os.system("rm -rf " + data_dir)
@@ -159,9 +163,8 @@ max_memsize = 0
 mem_a = [0] * bank_num
 total_nonzeros = 0
 for idx in range(bank_num):
-    with open("%s/ptr/ptr%d.dat"%(data_dir, idx), 'wb') as f:
-        ptr[idx].tofile(f) # Ptr is stored by 32-bit 
 
+    '''
     with open("%s/spm/spm%d.dat"%(data_dir, idx), 'wb') as f:
         # Spm and Ind are stored with 8-bit or with 32-bit * 2
         # Spm is stored in low 4-bit and Ind in high 4-bit
@@ -175,6 +178,28 @@ for idx in range(bank_num):
         total_nonzeros += np.count_nonzero(spm[idx])
         mem_a[idx] = mem.size
         mem.tofile(f)
+    '''
+    if C_simulation:
+        with open("%s/ptr/ptr%d.dat"%(data_dir, idx), 'wb') as f:
+            ptr[idx].tofile(f) # Ptr is stored by 32-bit 
+        with open("%s/spm/spm%d.dat"%(data_dir, idx), 'wb') as f:
+            mem = np.transpose(np.array([spm[idx],ind[idx]])).flatten()
+            mem.tofile(f)
+
+    else:
+        with open("%s/ptr/ptr%d.dat"%(data_dir, idx), 'wb') as f:
+            ptr[idx].astype(np.uint16).tofile(f) # Ptr is stored by 16-bit 
+        with open("%s/spm/weights%d.dat"%(data_dir, idx), 'wb') as f:
+            spm[idx].astype(np.uint8).tofile(f)
+
+        with open("%s/spm/index%d.dat"%(data_dir, idx), 'wb') as f:
+            ind[idx].astype(np.uint8).tofile(f)
+
+    if (spm.size > max_memsize):
+        max_memsize = spm[idx].size
+    total_nonzeros += np.count_nonzero(spm[idx])
+    mem_a[idx] = spm[idx].size
+
 
 total_memsize = sum(mem_a)
 print "Max memory size of one bank:", max_memsize
