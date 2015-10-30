@@ -13,13 +13,16 @@ import caffe
 
 caffe.set_mode_gpu()                                               
 caffe.set_device(0)                                                
-option = 'alexnet'
+option = 'vgg'
 if option == 'lenet5':                                             
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'       
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'     
 elif option == 'alexnet':                                          
     prototxt = '3_prototxt_solver/L2/train_val.prototxt'           
     caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel' 
+elif option == 'vgg':
+    prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'     
+    caffemodel = '4_model_checkpoint/vgg16/vgg16_13x.caffemodel'
 
 def kmeans(net, layers, num_c=16, initials=None, snapshot=False, alpha=0.0):            
     codebook = {}                                                                           
@@ -160,7 +163,7 @@ else:
 
 codebook = kmeans(net, layers)
 codes_W, codes_b = get_codes(net, codebook)
-ptr, spm, ind, layer_shift= get_csc(codes_W, codes_b, bank_num = bank_num)
+ptr, spm, ind, layer_shift= get_csc(codes_W, codes_b, bank_num = bank_num, max_jump = 16)
 
 simulator_root = os.environ['SIMULATOR_PATH']
 os.system("rm -rf %s/data/ptr"%simulator_root)
@@ -214,7 +217,7 @@ spm_unitsize = 16  # 16 code + 16 index
 buffer_size = 4
 
 ##################################################
-batch_size = net.blobs['conv1'].data.shape[0]
+batch_size = net.blobs['data'].data.shape[0]
 for i in range(1):
     net.forward()
 
