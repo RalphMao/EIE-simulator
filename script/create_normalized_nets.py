@@ -117,182 +117,42 @@ def get_csc_single_nobias(weights, bank_num = 64, max_jump = 16):
 
 
 caffe.set_mode_cpu()   
-options = parser.parse_args()
-option = options.net
-layer = options.layer
-bank_num = options.bank_num
-C_simulation = options.c_simulation
 
-simulator_root = os.environ['SIMULATOR_PATH']
-data_dir = simulator_root + '/data/%s_%s_%d'%(option, layer, bank_num)
-if option == 'lenet5':                                             
-    prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'       
-    caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'     
-elif option == 'alexnet':                                          
-    prototxt = '3_prototxt_solver/L2/train_val.prototxt'           
-    caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel' 
-elif option == 'vgg':
-    prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'     
-    caffemodel = '4_model_checkpoint/vgg16/vgg16_13x.caffemodel'
-elif option == 'lenet_300':
-    prototxt = '3_prototxt_solver/lenet_300_100/train_val.prototxt'           
-    caffemodel = '4_model_checkpoint/lenet_300_100/lenet300_100_9x.caffemodel'
-else:
-    print "Unknown net type:", option
-    sys.exit(1)
+nets = ['lenet5', 'alexnet', 'vgg', 'lenet_300'];
 
-net = caffe.Net(prototxt, caffemodel, caffe.TEST)
-
-codebook = kmeans(net, [layer])
-codes_W, codes_b = get_codes(net, codebook)
-weights = codes_W[layer]
-
-if option == 'vgg':
-    max_jump = 32
-else:
-    max_jump = 16
-ptr, spm, ind = get_csc_single_nobias(weights, bank_num = bank_num, max_jump = max_jump)
-
-
-os.system("rm -rf " + data_dir)
-os.system("mkdir " + data_dir)
-os.system("mkdir " + data_dir + '/ptr')
-os.system("mkdir " + data_dir + '/spm')
-
-max_memsize = 0
-mem_a = [0] * bank_num
-total_nonzeros = 0
-for idx in range(bank_num):
-
-    '''
-    with open("%s/spm/spm%d.dat"%(data_dir, idx), 'wb') as f:
-        # Spm and Ind are stored with 8-bit or with 32-bit * 2
-        # Spm is stored in low 4-bit and Ind in high 4-bit
-        if C_simulation:
-            mem = np.transpose(np.array([spm[idx],ind[idx]])).flatten()
-        else:
-            mem = spm[idx].astype(np.uint8) + (ind[idx].astype(np.uint8) << 4)
-
-        if (mem.size > max_memsize):
-            max_memsize = mem.size
-        total_nonzeros += np.count_nonzero(spm[idx])
-        mem_a[idx] = mem.size
-        mem.tofile(f)
-    '''
-    if C_simulation:
-        with open("%s/ptr/ptr%d.dat"%(data_dir, idx), 'wb') as f:
-            ptr[idx].tofile(f) # Ptr is stored by 32-bit 
-        with open("%s/spm/spm%d.dat"%(data_dir, idx), 'wb') as f:
-            mem = np.transpose(np.array([spm[idx],ind[idx]])).flatten()
-            mem.tofile(f)
-
+for option in nets:
+    if option == 'lenet5':                                             
+        prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'       
+        caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'     
+    elif option == 'alexnet':                                          
+        prototxt = '3_prototxt_solver/L2/train_val.prototxt'           
+        caffemodel = '4_model_checkpoint/alexnet/alexnet9x.caffemodel' 
+    elif option == 'vgg':
+        prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'     
+        caffemodel = '4_model_checkpoint/vgg16/vgg16_13x.caffemodel'
+    elif option == 'lenet_300':
+        prototxt = '3_prototxt_solver/lenet_300_100/train_val.prototxt'           
+        caffemodel = '4_model_checkpoint/lenet_300_100/lenet300_100_9x.caffemodel'
     else:
-        with open("%s/ptr/ptr%d.dat"%(data_dir, idx), 'wb') as f:
-            ptr[idx].astype(np.uint16).tofile(f) # Ptr is stored by 16-bit 
-        with open("%s/spm/weights%d.dat"%(data_dir, idx), 'wb') as f:
-            spm[idx].astype(np.uint8).tofile(f)
+        print "Unknown net type:", option
+        sys.exit(1)
 
-        with open("%s/spm/index%d.dat"%(data_dir, idx), 'wb') as f:
-            ind[idx].astype(np.uint8).tofile(f)
+    net = caffe.Net(prototxt, caffemodel, caffe.TEST)
+    codebook = kmeans(net, [layer])
+    codes_W, codes_b = get_codes(net, codebook)
+    net.save(caffemodel + '.quantize')
+    layers = filter(lambda x: 'ip' in x or 'fc' in x, net.params.keys())
 
-    if (spm.size > max_memsize):
-        max_memsize = spm[idx].size
-    total_nonzeros += np.count_nonzero(spm[idx])
-    mem_a[idx] = spm[idx].size
+    for layer in layers:
+        w = net.params[layer][0].data
+        b = net.params[layer][1].data
 
+        maxw = max(abs(w));
+        w /= maxw;
+        b /= maxw;
 
-total_memsize = sum(mem_a)
-print "Max memory size of one bank:", max_memsize
-print "Total memory size :", total_memsize
-print "Total Nonzeros:",total_nonzeros 
+        np.copyto(net.params[layer][0].data, w)
+        np.copyto(net.params[layer][1].data, b)
 
-with open("%s/arithm.dat"%data_dir, 'wb') as f:
-    if C_simulation:
-        codebook_t = np.array(codebook[layer], dtype=np.float32)
-    else: # 16-bit fixed-point, range in [-1,1]
-        codebook_t = np.array(codebook[layer], dtype=np.float64)
-        codebook_t = np.array(codebook_t / np.max(abs(codebook_t)) * (2 ** 15), dtype = np.int16)
-
-    codebook_t.tofile(f)
-    
-# Render config header file
-template = r'''
-// Auto generated by script/layer_dump.py
-
-#ifndef PARAMS
-#define PARAMS
-
-// Config harware
-const int NUM_PE = {{ bank_num }};
-const int ACTRW_maxcapacity = {{ max_size }};
-const int NZFETCH_buffersize = {{ buffer_size }};  
-const int PTRVEC_num_lines = {{ ptr_lines }};  
-const int SPMAT_unit_line   =  {{ spm_unitsize }};  // Nzeros per line
-const int SPMAT_num_lines   =  {{ spm_lines }}; 
-const int SPMAT_index_bits  =  4;  
-const int SPMAT_weights_bits=  4;  
-const int ARITHM_codebooksize = 16;
-
-// Config input data
-const int ACT_length = {{act_length}};
-#endif
-'''
-###################################################
-# Configuration
-spm_unitsize = 16  # 16 code + 16 index
-buffer_size = 4
-
-##################################################
-batch_size = net.blobs[layer].data.shape[0]
-for i in range(1):
-    net.forward()
-
-
-'''
-if option == 'lenet5':
-    if one_act:
-        act = np.array([2.0, 0.0, 1.0], dtype=np.float32)
-        ground_truth = 2.0 * net.params['ip1'][0].data[:,0] + 1.0 * net.params['ip1'][0].data[:,2]
-    else:
-        act = net.blobs['pool2'].data[idx % batch_size]
-        ground_truth = net.blobs['ip1'].data[idx % batch_size]
-else:
-    act = net.blobs['fc6'].data[idx % batch_size]
-    ground_truth = net.blobs['fc7'].data[idx % batch_size]
-
-if option == "lenet5":
-    max_inputsize = 1024
-else:
-    max_inputsize = 4096
-act_length = act.size
-'''
-
-all_layers = net.blobs.keys()
-layer_previous = all_layers[all_layers.index(layer)-1]
-if len(net.blobs[layer_previous].data.shape) == 1: # In case of lenet300-100
-    layer_previous = 'data'
-act = net.blobs[layer_previous].data[0].flatten()
-act_relu = (act + abs(act)) / 2
-ground_truth = np.dot(net.params[layer][0].data, act_relu)
-act_length = act.size
-max_inputsize = act_length
-
-with open("%s/act.dat"%data_dir, 'wb') as f:
-    if C_simulation:
-        act.tofile(f)
-    else:
-        act.astype(np.int16).tofile(f)
-
-with open("%s/groundtruth.dat"%data_dir, 'wb') as f:
-    ground_truth.tofile(f)
- 
-
-if C_simulation:
-    jtem = Template(template)
-    config_file = jtem.render(bank_num = bank_num, ptr_lines = ptr[0].size, 
-        spm_unitsize = spm_unitsize, spm_lines = (max_memsize - 1) / spm_unitsize / 2 + 1, 
-        max_size = max_inputsize, act_length = act_length, buffer_size = buffer_size)
-
-    with open("%s/src/params.h"%(simulator_root), 'w') as f:
-        f.write(config_file)
+    net.save(caffemodel + '.quantize.normalize')
 
