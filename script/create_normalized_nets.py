@@ -1,4 +1,5 @@
 
+import pickle
 import sys
 import os
 import numpy as np
@@ -138,16 +139,17 @@ for option in nets:
         sys.exit(1)
 
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
-    codebook = kmeans(net, [layer])
+    layers = filter(lambda x: 'ip' in x or 'fc' in x, net.params.keys())
+    codebook = kmeans(net, layers)
     codes_W, codes_b = get_codes(net, codebook)
     net.save(caffemodel + '.quantize')
-    layers = filter(lambda x: 'ip' in x or 'fc' in x, net.params.keys())
+    pickle.dump([codebook, codes_W, codes_b], open(caffemodel + '.codes', 'wb'))
 
     for layer in layers:
         w = net.params[layer][0].data
         b = net.params[layer][1].data
 
-        maxw = max(abs(w));
+        maxw = np.max(abs(w));
         w /= maxw;
         b /= maxw;
 

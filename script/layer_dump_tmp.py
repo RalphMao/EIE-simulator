@@ -1,4 +1,5 @@
 
+import pickle
 import sys
 import os
 import numpy as np
@@ -17,7 +18,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--net', type = str, default = 'alexnet')
 parser.add_argument('--layer', type = str, default = 'fc6')
 parser.add_argument('--bank-num', type = int, default = 8)
+parser.add_argument('--ind-bits', type = int, default = 4)
 parser.add_argument('--c-simulation', action = 'store_true')
+parser.add_argument('--binary', action = 'store_true')
 
 
 def kmeans(net, layers, num_c=16, initials=None, snapshot=False, alpha=0.0):            
@@ -122,9 +125,14 @@ option = options.net
 layer = options.layer
 bank_num = options.bank_num
 C_simulation = options.c_simulation
+binary = options.binary
+max_jump = 2 **  options.ind_bits
 
 simulator_root = os.environ['SIMULATOR_PATH']
 data_dir = simulator_root + '/data/%s_%s_%d'%(option, layer, bank_num)
+if options.ind_bits != 4:
+    data_dir += '_%d'%options.ind_bits
+
 if option == 'lenet5':                                             
     prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'       
     caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'     
@@ -143,14 +151,13 @@ else:
 
 net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 
+'''
 codebook = kmeans(net, [layer])
 codes_W, codes_b = get_codes(net, codebook)
+'''
+codebook, codes_W, codes_b = pickle.load(open(caffemodel + '.codes'))
 weights = codes_W[layer]
 
-if option == 'vgg':
-    max_jump = 32
-else:
-    max_jump = 16
 ptr, spm, ind = get_csc_single_nobias(weights, bank_num = bank_num, max_jump = max_jump)
 
 
@@ -182,20 +189,35 @@ for idx in range(bank_num):
     if C_simulation:
         with open("%s/ptr/ptr%d.dat"%(data_dir, idx), 'wb') as f:
             ptr[idx].tofile(f) # Ptr is stored by 32-bit 
-        with open("%s/spm/spm%d.dat"%(data_dir, idx), 'wb') as f:
+        with open("%s/spm/spm%d.dat"%(data_dir, idx), 'w') as f:
             mem = np.transpose(np.array([spm[idx],ind[idx]])).flatten()
             mem.tofile(f)
 
     else:
         with open("%s/ptr/ptr%d.dat"%(data_dir, idx), 'wb') as f:
-            ptr[idx].astype(np.uint16).tofile(f) # Ptr is stored by 16-bit 
-        with open("%s/spm/weights%d.dat"%(data_dir, idx), 'wb') as f:
-            spm[idx].astype(np.uint8).tofile(f)
+            if binary:
+                ptr[idx].astype(np.uint16).tofile(f) # Ptr is stored by 16-bit 
+            else:
+                f.write('%d\n'%len(ptr[idx]))
+                for number in ptr[idx]:
+                    f.write('{:016b} '.format(number))
+        with open("%s/spm/weights%d.dat"%(data_dir, idx), 'w') as f:
+            if binary:
+                spm[idx].astype(np.uint8).tofile(f)
+            else:
+                f.write('%d\n'%len(spm[idx]))
+                for number in spm[idx]:
+                    f.write('{:04b} '.format(number))
 
-        with open("%s/spm/index%d.dat"%(data_dir, idx), 'wb') as f:
-            ind[idx].astype(np.uint8).tofile(f)
+        with open("%s/spm/index%d.dat"%(data_dir, idx), 'w') as f:
+            if binary:
+                ind[idx].astype(np.uint8).tofile(f)
+            else:
+                f.write('%d\n'%len(ind[idx]))
+                for number in ind[idx]:
+                    f.write(('{:0%db} '%(options.ind_bits)).format(number))
 
-    if (spm.size > max_memsize):
+    if (spm[idx].size > max_memsize):
         max_memsize = spm[idx].size
     total_nonzeros += np.count_nonzero(spm[idx])
     mem_a[idx] = spm[idx].size
@@ -207,11 +229,7 @@ print "Total memory size :", total_memsize
 print "Total Nonzeros:",total_nonzeros 
 
 with open("%s/arithm.dat"%data_dir, 'wb') as f:
-    if C_simulation:
-        codebook_t = np.array(codebook[layer], dtype=np.float32)
-    else: # 16-bit fixed-point, range in [-1,1]
-        codebook_t = np.array(codebook[layer], dtype=np.float64)
-        codebook_t = np.array(codebook_t / np.max(abs(codebook_t)) * (2 ** 15), dtype = np.int16)
+    codebook_t = np.array(codebook[layer], dtype=np.float32)
 
     codebook_t.tofile(f)
     
