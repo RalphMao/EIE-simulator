@@ -1,2 +1,4 @@
-echo $1 >> log 
-./sparse_test $1 | grep cusparse_time >> log
+DATA=data/alexnet_fc6/matrix.dat
+echo "Computing, batch size 4096"
+./sparse_test $DATA 
+./dense_test

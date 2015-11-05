@@ -47,7 +47,6 @@ int main(int argc, char** argv) {
     cusparseStatus_t status;
     status = cusparseCreate(&handle);
     cusparseMatDescr_t descr=0;
-    Check(0)
 
     int m,n, nnz;
     float *csr_val;
@@ -60,7 +59,6 @@ int main(int argc, char** argv) {
 
     // Get Matrix ready
     Init_from_file(argv[1], &m, &n, &nnz, &csr_val, &csr_rowptr, &csr_colind);
-    Check(0.5)
     cudaMalloc((void**)&csr_val_gpu,nnz*sizeof(float));
     cudaMalloc((void**)&csr_colind_gpu,nnz*sizeof(int)); 
     cudaMalloc((void**)&csr_rowptr_gpu,(m+1)*sizeof(int)); 
@@ -88,25 +86,25 @@ int main(int argc, char** argv) {
     
     // Get extra things ready
     float *bias;
-    cudaMalloc((void**)&bias, m * sizeof(float));
-    cudaMemset(bias, 0, m * sizeof(float));
+    cudaMalloc((void**)&bias, m * n_v * sizeof(float));
+    cudaMemset(bias, 0, m * n_v * sizeof(float));
 
     float one = 1.0;
     float zero = 0.0;
 
-    Check(start)
+    Check(cusparse_start)
     cudaEvent_t start_gpu_;
     cudaEvent_t stop_gpu_; 
     cudaEventCreate(&start_gpu_);
     cudaEventCreate(&stop_gpu_);
     cudaEventRecord(start_gpu_, 0);
-    for (int time = 0; time < 1000; time++) {
+    for (int time = 0; time < 1; time++) {
     for (int idx = 0; idx < n_v; idx++) {
         status = cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, nnz, &one, 
             descr, csr_val_gpu, csr_rowptr_gpu, csr_colind_gpu, act_gpu + idx * m_v, 
             &one, bias);
         if (status != CUSPARSE_STATUS_SUCCESS) { printf("%d,%dfailed", time, idx); return 1; } 
-    }
+        }
     }
     cudaEventRecord(stop_gpu_, 0);
     cudaEventSynchronize(stop_gpu_);
@@ -115,6 +113,19 @@ int main(int argc, char** argv) {
     printf("CUDA Time Report: %.4f ms\n", SECONDS);
     Check(cusparse_time)
 
+    int batch_size = 64;
+    for (int idx = 0; idx < n_v / batch_size; idx ++) {
+        status = cusparseScsrmm(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+            m, batch_size, n, nnz,
+            &one, descr,
+            csr_val_gpu, csr_rowptr_gpu, csr_colind_gpu, 
+            act_gpu + idx * batch_size * m_v, m_v,
+            &zero, bias, m_v);
+
+    }
+    Check(cusparse_time_batchsize)
+
+    return 0;
     return 0;
 }
 
