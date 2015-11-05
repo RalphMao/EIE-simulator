@@ -95,11 +95,24 @@ int main(int argc, char** argv) {
     float zero = 0.0;
 
     Check(start)
+    cudaEvent_t start_gpu_;
+    cudaEvent_t stop_gpu_; 
+    cudaEventCreate(&start_gpu_);
+    cudaEventCreate(&stop_gpu_);
+    cudaEventRecord(start_gpu_, 0);
     for (int time = 0; time < 1000; time++) {
     for (int idx = 0; idx < n_v; idx++) {
-        cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, nnz, &one, descr, csr_val_gpu, csr_rowptr_gpu, csr_colind_gpu, act_gpu + idx * m_v, &one, bias);
+        status = cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, nnz, &one, 
+            descr, csr_val_gpu, csr_rowptr_gpu, csr_colind_gpu, act_gpu + idx * m_v, 
+            &one, bias);
+        if (status != CUSPARSE_STATUS_SUCCESS) { printf("%d,%dfailed", time, idx); return 1; } 
     }
     }
+    cudaEventRecord(stop_gpu_, 0);
+    cudaEventSynchronize(stop_gpu_);
+    float SECONDS;
+    cudaEventElapsedTime(&SECONDS, start_gpu_, stop_gpu_);
+    printf("CUDA Time Report: %.4f ms\n", SECONDS);
     Check(cusparse_time)
 
     return 0;
