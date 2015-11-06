@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
     float SECONDS;
     cudaEventElapsedTime(&SECONDS, start_gpu_, stop_gpu_);
     printf("CUDA Time Report: %.4f ms\n", SECONDS);
-    Check(cusparse_time)
+    Check(cusparse_time_batchsize1)
 
     int batch_size = 64;
     for (int idx = 0; idx < n_v / batch_size; idx ++) {
