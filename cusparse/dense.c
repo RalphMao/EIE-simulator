@@ -10,6 +10,13 @@
     printf("Checkpoint:"#INFO", time: %ld ms\n", (clock()-start) * 1000 / CLOCKS_PER_SEC);\
     start = clock(); 
 
+#define Check_CUDA(INFO) \
+    cudaEventRecord(stop_gpu_, 0); \
+    cudaEventSynchronize(stop_gpu_); \
+    cudaEventElapsedTime(&SECONDS, start_gpu_, stop_gpu_);\
+    printf("CUDA Time Report-"#INFO": %.4f ms\n", SECONDS);\
+    cudaEventRecord(start_gpu_, 0);
+
 int main(int argc, char** argv) {
     clock_t start = clock();
 
@@ -48,7 +55,13 @@ int main(int argc, char** argv) {
     float one = 1.0;
     float zero = 0.0;
 
-    Check(cublas_start)
+    cudaEvent_t start_gpu_;
+    cudaEvent_t stop_gpu_; 
+    cudaEventCreate(&start_gpu_);
+    cudaEventCreate(&stop_gpu_);
+    float SECONDS;
+    cudaEventRecord(start_gpu_, 0);
+
     for (int time = 0; time < 1; time++) {
     for (int idx = 0; idx < n_v; idx++) {
         status = cublasSgemv(handle, CUBLAS_OP_N, 
@@ -59,7 +72,7 @@ int main(int argc, char** argv) {
         if (status != CUBLAS_STATUS_SUCCESS) { printf("%d,%dfailed", time, idx); return 1; } 
         }
     }
-    Check(cublas_time_batchsize1)
+	Check_CUDA(cublas_time_batchsize1)
 
     int batch_size = 64;
     for (int idx = 0; idx < n_v / batch_size; idx ++) {
@@ -70,7 +83,7 @@ int main(int argc, char** argv) {
             act_gpu + idx * batch_size * m_v, m_v,
             &zero, bias, n_v);
     }
-    Check(cublas_time_batchsize)
+	Check_CUDA(cublas_time_batchsize64)
 
     return 0;
 }
