@@ -13,8 +13,9 @@ for dir_t in dirs:
     ff.write(out)
     ff.write('\n')
     out = out.split('\n')
+    time = 0
     for line in out:
-        if "cusparse_time_batchsize1" in line:
+        if "cusparse_time_batchsize" in line:
             time = int(line.split()[-2])
     f.write(dir_t + ', ' + str(time * 1000 / 4096) + 'us\n')
 f.close()
