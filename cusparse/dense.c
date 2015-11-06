@@ -16,11 +16,13 @@ int main(int argc, char** argv) {
     cublasHandle_t handle;
     cublasStatus_t status;
     status = cublasCreate(&handle);
+
+
     
     // Get weights ready
     float *weight, *weight_gpu;
-    int m = 4096;
-    int n = 4096;
+    int m = atoi(argv[1]);
+    int n = atoi(argv[2]);
     weight = (float*)malloc(m * n * sizeof(float));
     memset((void*)weight, 1, sizeof(float) * m * n);
 
@@ -30,7 +32,7 @@ int main(int argc, char** argv) {
 
     // Get activations ready
     float *act, *act_gpu;
-    int m_v = 4096;
+    int m_v = n;
     int n_v = 4096;
     act = (float*)malloc(m_v * n_v * sizeof(float));
     memset((void*)act, 1, sizeof(float) * m_v * n_v);
@@ -66,7 +68,7 @@ int main(int argc, char** argv) {
             &one,
             weight_gpu, m,
             act_gpu + idx * batch_size * m_v, m_v,
-            &zero, bias, m_v);
+            &zero, bias, n_v);
     }
     Check(cublas_time_batchsize)
 
