@@ -10,6 +10,13 @@
     printf("Checkpoint:"#INFO", time: %ld ms\n", (clock()-start) * 1000 / CLOCKS_PER_SEC);\
     start = clock(); 
 
+#define Check_CUDA(INFO) \
+    cudaEventRecord(stop_gpu_, 0); \
+    cudaEventSynchronize(stop_gpu_); \
+    cudaEventElapsedTime(&SECONDS, start_gpu_, stop_gpu_);\
+    printf("CUDA Time Report-"#INFO": %.4f ms\n", SECONDS);\
+    cudaEventRecord(start_gpu_, 0);
+
 
 void Init_from_file(char *filename, int *m, int *n, int *nnz, float **csr_val, int **csr_rowptr, int **csr_colind) {
     FILE *f = fopen(filename, "rb");
@@ -92,11 +99,12 @@ int main(int argc, char** argv) {
     float one = 1.0;
     float zero = 0.0;
 
-    Check(cusparse_start)
     cudaEvent_t start_gpu_;
     cudaEvent_t stop_gpu_; 
     cudaEventCreate(&start_gpu_);
     cudaEventCreate(&stop_gpu_);
+    float SECONDS;
+
     cudaEventRecord(start_gpu_, 0);
     for (int time = 0; time < 1; time++) {
     for (int idx = 0; idx < n_v; idx++) {
@@ -106,12 +114,7 @@ int main(int argc, char** argv) {
         if (status != CUSPARSE_STATUS_SUCCESS) { printf("%d,%dfailed", time, idx); return 1; } 
         }
     }
-    cudaEventRecord(stop_gpu_, 0);
-    cudaEventSynchronize(stop_gpu_);
-    float SECONDS;
-    cudaEventElapsedTime(&SECONDS, start_gpu_, stop_gpu_);
-    printf("CUDA Time Report: %.4f ms\n", SECONDS);
-    Check(cusparse_time_batchsize1)
+	Check_CUDA(cusparse_time_batchsize1)
 
     int batch_size = 64;
     for (int idx = 0; idx < n_v / batch_size; idx ++) {
@@ -123,9 +126,8 @@ int main(int argc, char** argv) {
             &zero, bias, m_v);
 
     }
-    Check(cusparse_time_batchsize)
+	Check_CUDA(cusparse_time_batchsize64)
 
-    return 0;
     return 0;
 }
 
