@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
             &one, descr,
             csr_val_gpu, csr_rowptr_gpu, csr_colind_gpu, 
             act_gpu + idx * batch_size * m_v, m_v,
-            &zero, bias, m_v);
+            &zero, bias, m);
 
     }
 	Check_CUDA(cusparse_time_batchsize64)

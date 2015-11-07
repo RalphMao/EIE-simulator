@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
             &one,
             weight_gpu, m,
             act_gpu + idx * batch_size * m_v, m_v,
-            &zero, bias, n_v);
+            &zero, bias, m);
     }
 	Check_CUDA(cublas_time_batchsize64)
 
