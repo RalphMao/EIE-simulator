@@ -1,7 +1,22 @@
 import glob
 import subprocess
 import numpy as np
-dirs = glob.glob('data/*')
+dirs = ['alexnet_fc6',
+'alexnet_fc7',
+'alexnet_fc8', 
+'vgg_fc6',   
+'vgg_fc7',   
+'vgg_fc8',  
+'lenet_300_ip1',  
+'lenet_300_ip2',  
+'lenet_300_ip3',  
+'lenet5_ip1',  
+'lenet5_ip2',  
+'neutalk_We',  
+'neutalk_Wd',  
+'neutalk_WLSTM']  
+
+dirs = map(lambda x: 'data/' + x, dirs)
 
 f = open('log','w')
 for dir_t in dirs:

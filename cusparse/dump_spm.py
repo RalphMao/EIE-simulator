@@ -49,5 +49,14 @@ for net_name in nets:
         mat = net.params[layer][0].data
         dump2file(mat, data_dir + '/matrix.dat')
 
+        all_layers = net.blobs.keys()
+        layer_previous = all_layers[all_layers.index(layer)-1]
+        if len(net.blobs[layer_previous].data.shape) == 1: # In case of lenet300-100
+            layer_previous = 'data'
+        act = net.blobs[layer_previous].data.flatten()
+        act_relu = (act + abs(act)) / 2
+
+        act_relu.tofile(data_dir + '/act.dat')
+        
 
 
