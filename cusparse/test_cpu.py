@@ -34,19 +34,23 @@ def sparse_mul(matrix, vectors, batchsize = 1):
     for i in range((n_v-1)/batchsize+1):
         res = matrix * vectors[:, batchsize * i:batchsize* i + batchsize]
 
+def sparse_mul_sp(matrix, vectors):
+    for vector in vectors:
+        res = matrix * vector
+
 def dense_mul(matrix, vectors, batchsize = 1):
     n_v = vectors.shape[1]
-    res = np.zeros((vectors.shape[0], batchsize), dtype = vectors.dtype)
+    res = np.zeros((matrix.shape[0], batchsize), dtype = vectors.dtype)
     for i in range((n_v-1)/batchsize+1):
-        a = np.dot(matrix,vectors[:, batchsize * i:batchsize* i + batchsize], res)
-
+        vector = vectors[:, batchsize * i:batchsize* i + batchsize]
+        a = np.dot(matrix,vector)
 
 
 f = open('log_cpu','w')
 for dir_t in dirs:
     file_t = dir_t + '/matrix.dat'
     print file_t
-    time_t = [0] * 4
+    time_t = [0] * 6
 
     csr_mat = load_fromfile(file_t)
     mat = csr_mat.todense()
@@ -57,18 +61,32 @@ for dir_t in dirs:
         acts = np.fromfile(dir_t + '/act.dat', dtype='f')
         n_v = acts.size / mat.shape[1]
         assert acts.size % mat.shape[1] == 0
-        acts = np.repeats(acts, vector_num/n_v+1)
+        acts = np.repeat(acts, vector_num/n_v+1)
         acts = acts.reshape((mat.shape[1], acts.size/mat.shape[1]))
         acts = acts[:, :vector_num]
 
+    spv = map(lambda x:sp.csr_matrix(acts[:,x:x+1]), range(acts.shape[1]))
+    spm = map(lambda x:sp.csr_matrix(acts[:,64 * x:64*x + 64]), range(acts.shape[1]/64))
+
+    print spm[0].shape
+    print spv[0].shape
+    print csr_mat.shape
     start_time = time.clock()
-    dense_mul(csr_mat, acts)
-    time_t[0] = time.clock() - start_time
+    sparse_mul_sp(csr_mat, spv)
+    time_t[4] = time.clock() - start_time
 
     start_time = time.clock()
-    dense_mul(csr_mat, acts, batchsize = 64)
+    sparse_mul_sp(csr_mat, spm)
+    time_t[5] = time.clock() - start_time
+
+    start_time = time.clock()
+    dense_mul(mat, acts, batchsize = 64)
     time_t[1] = time.clock() - start_time
     
+    start_time = time.clock()
+    dense_mul(mat, acts)
+    time_t[0] = time.clock() - start_time
+
     start_time = time.clock()
     sparse_mul(csr_mat, acts)
     time_t[2] = time.clock() - start_time
@@ -78,5 +96,6 @@ for dir_t in dirs:
     time_t[3] = time.clock() - start_time
 
     type = file_t.split('/')[-2]
-    f.write('%s, %.4f, %.4f, %.4f, %.4f\n'%((type,) +tuple(time_t)))
+    time_t = map(lambda x:x*1000/1024, time_t)
+    f.write('%s, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n'%((type,) +tuple(time_t)))
 f.close()

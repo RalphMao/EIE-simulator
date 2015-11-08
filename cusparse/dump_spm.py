@@ -44,7 +44,7 @@ for net_name in nets:
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
     net.forward()
     for layer in layers[net_name]:
-        data_dir = '/home/maohz12/dnn_simulator/data_spm/%s_%s'%(net_name, layer)
+        data_dir = '/home/maohz12/dnn_simulator/cusparse/data/%s_%s'%(net_name, layer)
         os.system('mkdir ' + data_dir)
         mat = net.params[layer][0].data
         dump2file(mat, data_dir + '/matrix.dat')
