@@ -11,6 +11,7 @@ banks_large = [8, 16, 32, 64, 128]
 banks_lenet = [2, 4, 8, 16, 32]
 
 
+'''
 net = 'vgg'
 banks = banks_large
 for layer in layers[net]:
@@ -18,7 +19,7 @@ for layer in layers[net]:
         flag = os.system('python layer_dump_tmp.py --net=%s --layer=%s --bank-num=%d --ind-bits=5 '%(net, layer, bank_num))
         if flag != 0:
             sys.exit(flag)
-
+'''
 
 for net in nets:
     if 'lenet' in net:

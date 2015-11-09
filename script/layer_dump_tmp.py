@@ -129,7 +129,7 @@ binary = options.binary
 max_jump = 2 **  options.ind_bits
 
 simulator_root = os.environ['SIMULATOR_PATH']
-data_dir = simulator_root + '/data/%s_%s_%d'%(option, layer, bank_num)
+data_dir = simulator_root + '/converted_data/%s_%s_%d'%(option, layer, bank_num)
 if options.ind_bits != 4:
     data_dir += '_%d'%options.ind_bits
 
@@ -194,28 +194,31 @@ for idx in range(bank_num):
             mem.tofile(f)
 
     else:
-        with open("%s/ptr/ptr%d.dat"%(data_dir, idx), 'wb') as f:
-            if binary:
-                ptr[idx].astype(np.uint16).tofile(f) # Ptr is stored by 16-bit 
+        f = open("%s/ptr_even_%d.txt"%(data_dir, idx), 'wb') 
+        g = open("%s/ptr_odd_%d.txt"%(data_dir, idx), 'wb') 
+        for idt in range(ptr[idx].size):
+            if idt % 2 == 1:
+                g.write('{:016b}\n'.format(ptr[idx][idt]))
             else:
-                f.write('%d\n'%len(ptr[idx]))
-                for number in ptr[idx]:
-                    f.write('{:016b} '.format(number))
-        with open("%s/spm/weights%d.dat"%(data_dir, idx), 'w') as f:
-            if binary:
-                spm[idx].astype(np.uint8).tofile(f)
-            else:
-                f.write('%d\n'%len(spm[idx]))
-                for number in spm[idx]:
-                    f.write('{:04b} '.format(number))
+                f.write('{:016b}\n'.format(ptr[idx][idt]))
+        f.close()
+        g.close()
 
-        with open("%s/spm/index%d.dat"%(data_dir, idx), 'w') as f:
+        with open("%s/spmat%d.txt"%(data_dir, idx), 'w') as f:
+            mem = np.transpose(np.array([spm[idx],ind[idx]])).flatten()
             if binary:
-                ind[idx].astype(np.uint8).tofile(f)
+                mem.astype(np.uint8).tofile(f)
             else:
-                f.write('%d\n'%len(ind[idx]))
-                for number in ind[idx]:
-                    f.write(('{:0%db} '%(options.ind_bits)).format(number))
+                # f.write('%d\n'%len(spm[idx]))
+                for idt in range(len(spm[idx])):
+                    if idt % 16 == 15:
+                        f.write('\n')
+                    upper = (idt / 16) * 16 + 15
+                    if upper >= len(spm[idx]):
+                        upper = len(spm[idx]) - 1
+                    ids = upper - idt % 16
+                    f.write('{:04b}'.format(spm[idx][ids]))
+                    f.write('{:04b}'.format(ind[idx][ids]))
 
     if (spm[idx].size > max_memsize):
         max_memsize = spm[idx].size
