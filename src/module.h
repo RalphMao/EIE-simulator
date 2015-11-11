@@ -182,6 +182,7 @@ class ArithmUnit : public BaseModule {
     Register read_data, result_mul, valid_p_p, read_addr_p_p;
 
     Wire read_addr, read_addr_last_D, value_decode_D;
+    Wire value_code_w;
     Wire value_to_add, result_muladd, result_mul_D;
     Wire bypass;
     Wire write_enable, write_addr, write_data;

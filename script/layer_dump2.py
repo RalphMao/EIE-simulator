@@ -5,6 +5,14 @@ import numpy as np
 import scipy.cluster.vq_maohz as scv
 from jinja2 import Template
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--net', type = str, default = 'alexnet')
+parser.add_argument('--layer', type = str, default = 'fc6')
+parser.add_argument('--bank-num', type = int, default = 64)
+parser.add_argument('--ind-bits', type = int, default = 4)
+
 def kmeans(net, layers, num_c=16, initials=None, snapshot=False, alpha=0.0):            
     codebook = {}                                                                           
     if type(num_c) == type(1):                                                              
@@ -141,8 +149,16 @@ def get():
     import caffe
 
     caffe.set_mode_gpu()                                               
-    caffe.set_device(0)                                                
-    option = 'vgg'
+    caffe.set_device(0)
+
+    options = parser.parse_args()
+    option = options.net
+    layer = options.layer
+    bank_num = options.bank_num
+    max_jump = 2 **  options.ind_bits
+
+    simulator_root = os.environ['SIMULATOR_PATH']
+
     if option == 'lenet5':                                             
         prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'       
         caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'     
@@ -152,19 +168,21 @@ def get():
     elif option == 'vgg':
         prototxt = '3_prototxt_solver/vgg16/train_val.prototxt'     
         caffemodel = '4_model_checkpoint/vgg16/vgg16_13x.caffemodel'
+    elif option == 'lenet_300':
+        prototxt = '3_prototxt_solver/lenet_300_100/train_val.prototxt'           
+        caffemodel = '4_model_checkpoint/lenet_300_100/lenet300_100_9x.caffemodel'
+    else:
+        print "Unknown net type:", option
+        sys.exit(1)
+
 
 
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
-    if option == 'lenet5':
-        layers = ['ip1']
-        bank_num = 4
-    else:
-        layers = ['fc7']
-        bank_num = 32
+    layers = [layer]
 
     codebook = kmeans(net, layers)
     codes_W, codes_b = get_codes(net, codebook)
-    ptr, spm, ind, layer_shift= get_csc(codes_W, codes_b, bank_num = bank_num, max_jump = 16)
+    ptr, spm, ind, layer_shift= get_csc(codes_W, codes_b, bank_num = bank_num, max_jump = max_jump)
 
     simulator_root = os.environ['SIMULATOR_PATH']
     os.system("rm -rf %s/data/ptr"%simulator_root)
@@ -222,24 +240,15 @@ def get():
     for i in range(1):
         net.forward()
 
-    one_act = 1 # For debug
-
-    if option == 'lenet5':
-        if one_act:
-            act = np.array([2.0, 0.0, 1.0], dtype=np.float32)
-            ground_truth = 2.0 * net.params['ip1'][0].data[:,0] + 1.0 * net.params['ip1'][0].data[:,2]
-        else:
-            act = net.blobs['pool2'].data[idx % batch_size]
-            ground_truth = net.blobs['ip1'].data[idx % batch_size]
+    if option == 'lenet_300' and layer == 'ip1':
+        layer_p = 'data'
     else:
-        act = net.blobs['fc6'].data[0]
-        ground_truth = net.blobs['fc7'].data[0]
+        layer_p = net.blobs.keys()[net.blobs.keys().index(layer)-1]
 
-    if option == "lenet5":
-        max_inputsize = 1024
-    else:
-        max_inputsize = 4096
+    act = net.blobs[layer_p].data[0].flatten()
+    ground_truth = net.blobs[layer].data[0].flatten()
     act_length = act.size
+    max_inputsize = max(act_length, ground_truth.size)
 
     jtem = Template(template)
     config_file = jtem.render(bank_num = bank_num, ptr_lines = ptr[0].size, 
