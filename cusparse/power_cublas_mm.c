@@ -63,20 +63,8 @@ int main(int argc, char** argv) {
     float SECONDS;
     cudaEventRecord(start_gpu_, 0);
 
-    for (int time = 0; time < 1; time++) {
-    for (int idx = 0; idx < n_v; idx++) {
-        status = cublasSgemv(handle, CUBLAS_OP_N, 
-            m, n, &one,
-            weight_gpu, m,
-            act_gpu + m_v * idx, 1,
-            &zero, bias, 1);
-        if (status != CUBLAS_STATUS_SUCCESS) { printf("%d,%dfailed", time, idx); return 1; } 
-        }
-    }
-	Check_CUDA(cublas_time_batchsize1)
-
     int batch_size = 64;
-    for (int time = 0; time < 100; time++) {
+    while (1) {
     for (int idx = 0; idx < n_v / batch_size; idx ++) {
         status = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
             m, batch_size, n,

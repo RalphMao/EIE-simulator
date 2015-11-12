@@ -107,17 +107,8 @@ int main(int argc, char** argv) {
     float SECONDS;
 
     cudaEventRecord(start_gpu_, 0);
-    for (int time = 0; time < 1000; time++) {
-    for (int idx = 0; idx < n_v; idx++) {
-        status = cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, nnz, &one, 
-            descr, csr_val_gpu, csr_rowptr_gpu, csr_colind_gpu, act_gpu + idx * m_v, 
-            &one, bias);
-        if (status != CUSPARSE_STATUS_SUCCESS) { printf("%d,%dfailed", time, idx); return 1; } 
-        }
-    }
-	Check_CUDA(cusparse_time_batchsize1)
-
     int batch_size = 64;
+    while (1) {
     for (int idx = 0; idx < n_v / batch_size; idx ++) {
         status = cusparseScsrmm(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
             m, batch_size, n, nnz,
@@ -126,6 +117,7 @@ int main(int argc, char** argv) {
             act_gpu + idx * batch_size * m_v, m_v,
             &zero, bias, m);
 
+    }
     }
 	Check_CUDA(cusparse_time_batchsize64)
 
