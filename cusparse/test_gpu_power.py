@@ -50,8 +50,8 @@ for dir_t in dirs:
 
         for times in range(10):
             time.sleep(1)
-            os.system('nvidia-smi > tmp_log')
-            power[times] = parse_nvi('tmp_log', gpu_id)
+            os.system('nvidia-smi > tmp_gpu_log')
+            power[times] = parse_nvi('tmp_gpu_log', gpu_id)
         p.kill()
         f.write(str(max(power)) + ', ')
         f.flush()

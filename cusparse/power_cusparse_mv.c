@@ -50,7 +50,7 @@ void Init_act_from_file(char* filename, int *m, int *n, float **act) {
 int main(int argc, char** argv) {
     clock_t start = clock();
 
-    cudaSetDevice(1);
+    cudaSetDevice(0);
     cusparseHandle_t handle=0;
     cusparseStatus_t status;
     status = cusparseCreate(&handle);
