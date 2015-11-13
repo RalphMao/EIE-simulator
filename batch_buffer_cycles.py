@@ -28,4 +28,4 @@ for net in nets:
                 sys.exit(1)
         
             f.write('%d, '%cycles)
-        fwrite('\n')
+        f.write('\n')
