@@ -144,13 +144,13 @@ class SpMatRead : public BaseModule {
     virtual inline ModuleType name() {
         return SpMatRead_k;
     }
+    SharedWire patch_complete_D, memory_shift_D, memory_addr_D, read_enable_D, valid_D, value_D;
 
-    Register memory_addr, read_enable, memory_shift, patch_complete, valid, value;
+    Register patch_complete, memory_shift, memory_addr, read_enable, value, valid;
 
     Wire index, code, valid_w, value_w, patch_complete_w;
     Wire data_read[SPMAT_unit_line * 2];
 
-    SharedWire memory_addr_D, read_enable_D, memory_shift_D, patch_complete_D, valid_D, value_D;
 
     Memory WImem;
 
