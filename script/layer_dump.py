@@ -142,7 +142,7 @@ def get():
 
     caffe.set_mode_gpu()                                               
     caffe.set_device(0)                                                
-    option = 'vgg'
+    option = 'alexnet'
     if option == 'lenet5':                                             
         prototxt = '3_prototxt_solver/lenet5/train_val.prototxt'       
         caffemodel = '4_model_checkpoint/lenet5/lenet5.caffemodel'     

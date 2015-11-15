@@ -5,7 +5,7 @@ import numpy as np
 layers = {'alexnet':['fc6', 'fc7', 'fc8'],
           'vgg': ['fc6', 'fc7', 'fc8']}
 
-buffersizes = 2 ** np.arange(0,9)
+buffersizes = 2 ** np.arange(1,9)
 
 f = open('cycles_buffer.log','w')
 nets = layers.keys()
@@ -14,7 +14,7 @@ for net in nets:
         f.write(net + '_' + layer + ', ')
         for buffersize in buffersizes:
             print net, layer
-            flag = os.system('python script/layer_dump2.py --net=%s --layer=%s --buffersize=%d'%(net, layer, buffersizes))
+            flag = os.system('python script/layer_dump2.py --net=%s --layer=%s --buffersize=%d'%(net, layer, buffersize))
             os.system('make')
             p = subprocess.Popen(['./simulation'], stdout = subprocess.PIPE, stderr= subprocess.PIPE)
             out, err = p.communicate()
