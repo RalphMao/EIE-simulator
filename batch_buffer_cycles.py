@@ -7,7 +7,10 @@ layers = {'alexnet':['fc6', 'fc7', 'fc8'],
 
 buffersizes = 2 ** np.arange(1,9)
 
-f = open('cycles_buffer.log','w')
+
+keyword = 'cycles'
+f = open('%s_buffer.log'%keyword,'w')
+
 nets = layers.keys()
 for net in nets:
     for layer in layers[net]:
@@ -21,7 +24,7 @@ for net in nets:
             out = err.split('\n')
             cycles = 0
             for line in out:
-                if 'cycles' in line:
+                if keyword in line:
                     cycles = int(line.split(':')[-1])
             if cycles == 0:
                 print "wrong!"
@@ -45,7 +48,7 @@ for net in nets:
             out = err.split('\n')
             cycles = 0
             for line in out:
-                if 'cycles' in line:
+                if keyword in line:
                     cycles = int(line.split(':')[-1])
             if cycles == 0:
                 print "wrong!"
