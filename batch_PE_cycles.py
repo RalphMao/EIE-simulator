@@ -35,7 +35,7 @@ layers_rnn = {'neutalk':['We', 'Wd', 'WLSTM']}
 nets=  layers_rnn.keys()
 for net in nets:
     for layer in layers_rnn[net]:
-        f.write('%s/%s, '%(net, layer))
+        f.write('%s_%s, '%(net, layer))
         for num_pe in PEs:
             flag = os.system('python script/lstm_layer_dump.py --layer=%s --bank-num=%s'%(layer, num_pe))
             print net, layer, num_pe
