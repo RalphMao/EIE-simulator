@@ -7,8 +7,8 @@ TARGET := $(BUILD)/$(EXE)
 
 CXX = g++
 
-DEBUG := 1
-PROFILE := 1
+DEBUG := 0
+PROFILE := 0
 
 ifeq ($(DEBUG), 1)
     CFLAGS := -Wall -g -std=c++11 -O2 -Wuninitialized -Wfatal-errors -D DEBUG=1 -D PROFILE=$(PROFILE)

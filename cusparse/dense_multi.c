@@ -20,7 +20,7 @@
 int main(int argc, char** argv) {
     clock_t start = clock();
 
-    cudaSetDevice(1);
+    cudaSetDevice(0);
     cublasHandle_t handle;
     cublasStatus_t status;
     status = cublasCreate(&handle);

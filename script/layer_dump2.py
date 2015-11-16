@@ -11,8 +11,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--net', type = str, default = 'alexnet')
 parser.add_argument('--layer', type = str, default = 'fc6')
 parser.add_argument('--bank-num', type = int, default = 64)
-parser.add_argument('--buffersize', type = int, default = 4)
+parser.add_argument('--buffersize', type = int, default = 8)
 parser.add_argument('--ind-bits', type = int, default = 4)
+parser.add_argument('--sram-line', type = int, default = 64)
 
 def kmeans(net, layers, num_c=16, initials=None, snapshot=False, alpha=0.0):            
     codebook = {}                                                                           
@@ -158,6 +159,7 @@ def get():
     bank_num = options.bank_num
     buffer_size = options.buffersize
     max_jump = 2 **  options.ind_bits
+    spm_unitsize = options.sram_line / 8
 
     simulator_root = os.environ['SIMULATOR_PATH']
 
@@ -234,7 +236,6 @@ def get():
     '''
 ###################################################
 # Configuration
-    spm_unitsize = 16  # 16 code + 16 index
 
 ##################################################
     batch_size = net.blobs['data'].data.shape[0]

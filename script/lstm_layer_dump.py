@@ -6,8 +6,15 @@ import scipy.cluster.vq_maohz as scv
 import pickle
 
 from layer_dump import *
-layers = [sys.argv[1]]
-key = sys.argv[1]
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--layer', type = str, default = 'fc6')
+parser.add_argument('--bank-num', type = int, default = 64)
+parser.add_argument('--buffersize', type = int, default = 8)
+parser.add_argument('--ind-bits', type = int, default = 4)
+parser.add_argument('--sram-line', type = int, default = 64)
 
 W_ = pickle.load(open('/home/maohz12/dnn_simulator/data_rnn/coco_1.6.pkl'))
 
@@ -23,8 +30,14 @@ class fakenet(object):
 
 net = fakenet(W_)
 
-bank_num = 64
-codebook = kmeans(net, layers)
+options = parser.parse_args()
+key = options.layer
+bank_num = options.bank_num
+buffer_size = options.buffersize
+max_jump = 2 **  options.ind_bits
+spm_unitsize = options.sram_line / 8
+
+codebook = kmeans(net, [key])
 codes_W, codes_b = get_codes(net, codebook)
 ptr, spm, ind, layer_shift= get_csc(codes_W, codes_b, bank_num = bank_num, max_jump = 16)
 act = np.ones(W_[key].shape[0], dtype = np.float32)
@@ -78,8 +91,6 @@ const int ACT_length = {{act_length}};
 '''
 ###################################################
 # Configuration
-spm_unitsize = 16  # 16 code + 16 index
-buffer_size = 4
 
 ##################################################
 

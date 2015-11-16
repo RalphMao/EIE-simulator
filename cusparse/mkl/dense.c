@@ -44,8 +44,8 @@ int main(int argc, char** argv) {
     for (int idx = 0; idx < n_v; idx++) {
         cblas_sgemv(CblasColMajor, CblasNoTrans, 
             m, n, one,
-            weight_gpu, m,
-            act_gpu + m_v * idx, 1,
+            weight, m,
+            act+ m_v * idx, 1,
             zero, bias, 1);
     }
     }
@@ -56,8 +56,8 @@ int main(int argc, char** argv) {
         cblas_sgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
             m, batch_size, n,
             one,
-            weight_gpu, m,
-            act_gpu + idx * batch_size * m_v, m_v,
+            weight, m,
+            act+ idx * batch_size * m_v, m_v,
             zero, bias, m);
     }
     }

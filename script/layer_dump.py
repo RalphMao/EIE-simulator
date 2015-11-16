@@ -219,6 +219,8 @@ def get():
 
 ##################################################
     batch_size = net.blobs['data'].data.shape[0]
+    import IPython
+    IPython.embed()
     for i in range(1):
         net.forward()
 
