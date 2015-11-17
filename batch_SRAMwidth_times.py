@@ -7,7 +7,7 @@ layers = {'alexnet':['fc6', 'fc7', 'fc8'],
 
 widths = [16,32,64,128,256,512]
 
-f = open('times_PE.log','w')
+f = open('times_SRAMwidth.log','w')
 nets = layers.keys()
 for net in nets:
     for layer in layers[net]:
@@ -21,7 +21,7 @@ for net in nets:
             out = err.split('\n')
             times = 0
             for line in out:
-                if 'times' in line:
+                if 'total_spm' in line:
                     times = int(line.split(':')[-1])
             if times == 0:
                 print "wrong!"
@@ -45,7 +45,7 @@ for net in nets:
             out = err.split('\n')
             times = 0
             for line in out:
-                if 'times' in line:
+                if 'total_spm' in line:
                     times = int(line.split(':')[-1])
             if times == 0:
                 print "wrong!"

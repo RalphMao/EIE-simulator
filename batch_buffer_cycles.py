@@ -5,10 +5,10 @@ import numpy as np
 layers = {'alexnet':['fc6', 'fc7', 'fc8'],
           'vgg': ['fc6', 'fc7', 'fc8']}
 
-buffersizes = 2 ** np.arange(1,9)
+buffersizes = 2 ** np.arange(1,10)
 
 
-keyword = 'cycles'
+keyword = 'Efficiency'
 f = open('%s_buffer.log'%keyword,'w')
 
 nets = layers.keys()
@@ -25,12 +25,12 @@ for net in nets:
             cycles = 0
             for line in out:
                 if keyword in line:
-                    cycles = int(line.split(':')[-1])
+                    cycles = float(line.split(':')[-1])
             if cycles == 0:
                 print "wrong!"
                 sys.exit(1)
         
-            f.write('%d, '%cycles)
+            f.write('%.4f, '%cycles)
         f.write('\n')
 
 layers_rnn = {'neutalk':['We', 'Wd', 'WLSTM']}
@@ -49,12 +49,12 @@ for net in nets:
             cycles = 0
             for line in out:
                 if keyword in line:
-                    cycles = int(line.split(':')[-1])
+                    cycles = float(line.split(':')[-1])
             if cycles == 0:
                 print "wrong!"
                 sys.exit(1)
         
-            f.write('%d, '%(cycles))
+            f.write('%.4f, '%(cycles))
         f.write('\n')
     
 f.close()

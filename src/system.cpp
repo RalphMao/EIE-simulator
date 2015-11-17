@@ -177,20 +177,24 @@ int main() {
 
     LOG("System initialization done");
     while (!system.done() || system.cycles < 9) {
-        LOG_DEBUG(("Cycle:" + (to_string(system.cycles))));
+        if (system.cycles % 100 == 0) {
+            LOG_DEBUG(("Cycle:" + (to_string(system.cycles))));
+        }
 #if DEBUG == 1
+        /*
         if (system.cycles < 200) {
             print_v();
         }
+        */
 #endif
 
         system.tic();
     }
     LOG("One layer done, cycles:" + to_string(system.cycles));
-#if DEBUG == 1
-    LOG("Efficiency:" + to_string(double(act[0]->valid_write_times) / system.cycles / NUM_PE));
     system.output("data/output.dat");
 #if PROFILE == 1
+#if DEBUG == 1
+    LOG("Efficiency:" + to_string(double(act[0]->valid_write_times) / system.cycles / NUM_PE));
     int total_ptr = 0;
     int total_spm = 0;
     for (int i=0; i < NUM_PE; i++) {
