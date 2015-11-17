@@ -90,8 +90,8 @@ void ArithmUnit::update() {
     act_value_p = act_value_w;
 
 
-    // valid_p = valid_w && value_code_w != 0; // If not count zeros
-    valid_p = valid_w;  // If count zeros
+    valid_p = valid_w && value_code_w != 0; // If not count zeros
+    // valid_p = valid_w;  // If count zeros
 
     // Stage 3
     read_addr_p_p = read_addr_p_w;

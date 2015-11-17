@@ -5,10 +5,10 @@ import numpy as np
 layers = {'alexnet':['fc6', 'fc7', 'fc8'],
           'vgg': ['fc6', 'fc7', 'fc8']}
 
-PEs = 2 ** np.arange(0,11)
+PEs = 2 ** np.arange(9,11)
 
 
-keyword = 'Efficiency'
+keyword = 'Effici'
 f = open('%s_PE.log'%keyword,'w')
 
 nets = layers.keys()

@@ -4,6 +4,7 @@ import pickle
 import numpy as np
 caffe_root = os.environ["CAFFE_ROOT"]
 sys.path.insert(0, caffe_root + 'python')
+os.chdir(caffe_root)
 import caffe
 
 class blob(object):
@@ -24,8 +25,8 @@ layers = {'alexnet':['fc6', 'fc7', 'fc8'],
 PEs = 2 ** np.arange(0,11)
 
 simulator_root = os.environ['SIMULATOR_PATH']
-f_std = open(simulator_root + '/workloads_std.log')
-f_mean = open(simulator_root + '/workloads_mean.log')
+f_std = open(simulator_root + '/workloads_std.log', 'w')
+f_mean = open(simulator_root + '/workloads_mean.log', 'w' )
 
 for option in layers.keys():
     if option == 'lenet5':                                             
@@ -57,7 +58,7 @@ for option in layers.keys():
             workloads = np.zeros((bank_num, weights.shape[1]))
             for idx in range(bank_num):
                 tmp = np.take(weights, range(idx, weights.shape[0], bank_num), axis=0)
-                workloads[idx] = np.sum(tmp, axis = 0)
+                workloads[idx] = np.sum(tmp != 0, axis = 0)
             f_std.write('%.4f, '%np.std(workloads))
             f_mean.write('%.4f, '%np.mean(workloads))
         f_std.write('\n')
