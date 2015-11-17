@@ -46,7 +46,7 @@ def dense_mul(matrix, vectors, batchsize = 1):
         a = np.dot(matrix,vector)
 
 
-f = open('log_cpu','w')
+f = open('log/log_cpu_time','w')
 for dir_t in dirs:
     file_t = dir_t + '/matrix.dat'
     print file_t

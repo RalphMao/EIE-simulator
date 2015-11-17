@@ -50,7 +50,7 @@ void Init_act_from_file(char* filename, int *m, int *n, float **act) {
 int main(int argc, char** argv) {
     clock_t start = clock();
 
-    cudaSetDevice(1);
+    cudaSetDevice(GPU_ID);
     cusparseHandle_t handle=0;
     cusparseStatus_t status;
     status = cusparseCreate(&handle);
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
     float SECONDS;
 
     cudaEventRecord(start_gpu_, 0);
-    for (int time = 0; time < 1000; time++) {
+    for (int time = 0; time < TIMES; time++) {
     for (int idx = 0; idx < n_v; idx++) {
         status = cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m, n, nnz, &one, 
             descr, csr_val_gpu, csr_rowptr_gpu, csr_colind_gpu, act_gpu + idx * m_v, 
@@ -117,17 +117,6 @@ int main(int argc, char** argv) {
     }
 	Check_CUDA(cusparse_time_batchsize1)
 
-    int batch_size = 64;
-    for (int idx = 0; idx < n_v / batch_size; idx ++) {
-        status = cusparseScsrmm(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-            m, batch_size, n, nnz,
-            &one, descr,
-            csr_val_gpu, csr_rowptr_gpu, csr_colind_gpu, 
-            act_gpu + idx * batch_size * m_v, m_v,
-            &zero, bias, m);
-
-    }
-	Check_CUDA(cusparse_time_batchsize64)
 
     return 0;
 }

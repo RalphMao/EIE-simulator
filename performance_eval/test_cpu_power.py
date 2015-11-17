@@ -73,7 +73,7 @@ def test_time(func, *args):
     return max(power)
 
 
-f = open('power_cpu_log','w')
+f = open('log/power_cpu_log','w')
 power = [0] * 6
 for dir_t in dirs:
     file_t = dir_t + '/matrix.dat'

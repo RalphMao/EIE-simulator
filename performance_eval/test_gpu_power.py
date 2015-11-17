@@ -20,10 +20,10 @@ dirs = ['alexnet_fc6',
 'neutalk_Wd',  
 'neutalk_WLSTM']  
 
-programs = ['power_cublas_mv',
-'power_cublas_mm',
-'power_cusparse_mv',
-'power_cusparse_mm']
+programs = ['dense_mv',
+'dense_mm',
+'sparse_mv',
+'sparse_mm']
 
 def parse_nvi(file_str, idx):
     lines = open(file_str).read()
@@ -36,7 +36,9 @@ dirs = map(lambda x: 'data/' + x, dirs)
 gpu_id = 0
 
 power = np.zeros(10)
-f = open('power_gpu_log','w')
+f = open('log/log_power_gpu','w')
+f.write(', dense_mv, dense_mm, sparse_mv, sparse_mm, \n')
+
 for dir_t in dirs:
     file_t = dir_t + '/matrix.dat'
     m,n = np.fromfile(file_t, np.int32, 2)

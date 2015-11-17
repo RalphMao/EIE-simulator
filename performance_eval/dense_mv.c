@@ -20,7 +20,7 @@
 int main(int argc, char** argv) {
     clock_t start = clock();
 
-    cudaSetDevice(0);
+    cudaSetDevice(GPU_ID);
     cublasHandle_t handle;
     cublasStatus_t status;
     status = cublasCreate(&handle);
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     float SECONDS;
     cudaEventRecord(start_gpu_, 0);
 
-    while (1) {
+    for (int time = 0; time < TIMES; time++) {
     for (int idx = 0; idx < n_v; idx++) {
         status = cublasSgemv(handle, CUBLAS_OP_N, 
             m, n, &one,
