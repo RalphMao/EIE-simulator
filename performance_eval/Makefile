@@ -1,7 +1,7 @@
 
-PLATFORM := PC
-GPU_ID := 1
-TEST_POWER := 0
+PLATFORM := TK1
+GPU_ID := 0
+TEST_POWER := 1
 
 SRC_FILES := %.c %.cpp
 OBJ_FILES := $(patsubst %.c, %, $(wildcard *.c)) $(patsubst %.cpp, %, $(wildcard *.cpp)) 

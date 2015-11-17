@@ -44,6 +44,16 @@ for dir_t in dirs:
 
         time.sleep(10)
         p.kill()
-        time.sleep(6)
+        print "Stop Now!"
+        stop = False
+        while not stop:
+            time.sleep(1)
+            os.system('ps -A | grep %s > .tmp'%program)
+            content = open('.tmp').readlines()
+            stop = True
+            for line in content:
+                if len(line) > 5 and 'defunct' not in line:
+                    stop = False
+        time.sleep(5)
 
 
