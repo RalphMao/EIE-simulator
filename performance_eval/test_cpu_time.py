@@ -99,6 +99,6 @@ for dir_t in dirs:
 
 
     type = file_t.split('/')[-2]
-    time_t = map(lambda x:x*1000*1000/1024, time_t)
+    time_t = map(lambda x:x*1000*1000/vector_num, time_t)
     f.write('%s, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n'%((type,) +tuple(time_t)))
 f.close()
