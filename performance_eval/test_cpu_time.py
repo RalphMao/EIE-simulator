@@ -54,7 +54,7 @@ for dir_t in dirs:
 
     csr_mat = load_fromfile(file_t)
     mat = csr_mat.todense()
-    vector_num = 256
+    vector_num = 1024
     if 'neutalk' in dir_t:
         acts = np.ones((mat.shape[1], vector_num), dtype = 'f')
     else:
@@ -99,6 +99,6 @@ for dir_t in dirs:
 
 
     type = file_t.split('/')[-2]
-    time_t = map(lambda x:x*1000*1000/vector_num, time_t)
+    time_t = map(lambda x:x*1000*1000/1024, time_t)
     f.write('%s, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n'%((type,) +tuple(time_t)))
 f.close()
