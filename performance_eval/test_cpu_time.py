@@ -71,21 +71,15 @@ for dir_t in dirs:
     print spm[0].shape
     print spv[0].shape
     print csr_mat.shape
-    start_time = time.clock()
-    sparse_mul_sp(csr_mat, spv)
-    time_t[4] = time.clock() - start_time
 
     start_time = time.clock()
-    sparse_mul_sp(csr_mat, spm)
-    time_t[5] = time.clock() - start_time
+    dense_mul(mat, acts)
+    time_t[0] = time.clock() - start_time
 
     start_time = time.clock()
     dense_mul(mat, acts, batchsize = 64)
     time_t[1] = time.clock() - start_time
     
-    start_time = time.clock()
-    dense_mul(mat, acts)
-    time_t[0] = time.clock() - start_time
 
     start_time = time.clock()
     sparse_mul(csr_mat, acts)
@@ -94,6 +88,15 @@ for dir_t in dirs:
     start_time = time.clock()
     sparse_mul(csr_mat, acts, batchsize = 64)
     time_t[3] = time.clock() - start_time
+
+    start_time = time.clock()
+    sparse_mul_sp(csr_mat, spv)
+    time_t[4] = time.clock() - start_time
+
+    start_time = time.clock()
+    sparse_mul_sp(csr_mat, spm)
+    time_t[5] = time.clock() - start_time
+
 
     type = file_t.split('/')[-2]
     time_t = map(lambda x:x*1000*1000/1024, time_t)
