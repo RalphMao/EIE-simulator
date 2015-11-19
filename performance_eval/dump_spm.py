@@ -47,6 +47,7 @@ for net_name in nets:
         data_dir = '/home/maohz12/dnn_simulator/cusparse/data/%s_%s'%(net_name, layer)
         os.system('mkdir ' + data_dir)
         mat = net.params[layer][0].data
+        mat.tofile(data_dir + '/dense.dat')
         dump2file(mat, data_dir + '/matrix.dat')
 
         all_layers = net.blobs.keys()
