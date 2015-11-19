@@ -54,7 +54,7 @@ for dir_t in dirs:
 
     csr_mat = load_fromfile(file_t)
     mat = csr_mat.todense()
-    vector_num = 256
+    vector_num = 1024
     if 'neutalk' in dir_t:
         acts = np.ones((mat.shape[1], vector_num), dtype = 'f')
     else:
@@ -71,21 +71,15 @@ for dir_t in dirs:
     print spm[0].shape
     print spv[0].shape
     print csr_mat.shape
-    start_time = time.clock()
-    sparse_mul_sp(csr_mat, spv)
-    time_t[4] = time.clock() - start_time
 
     start_time = time.clock()
-    sparse_mul_sp(csr_mat, spm)
-    time_t[5] = time.clock() - start_time
+    dense_mul(mat, acts)
+    time_t[0] = time.clock() - start_time
 
     start_time = time.clock()
     dense_mul(mat, acts, batchsize = 64)
     time_t[1] = time.clock() - start_time
     
-    start_time = time.clock()
-    dense_mul(mat, acts)
-    time_t[0] = time.clock() - start_time
 
     start_time = time.clock()
     sparse_mul(csr_mat, acts)
@@ -95,7 +89,16 @@ for dir_t in dirs:
     sparse_mul(csr_mat, acts, batchsize = 64)
     time_t[3] = time.clock() - start_time
 
+    start_time = time.clock()
+    sparse_mul_sp(csr_mat, spv)
+    time_t[4] = time.clock() - start_time
+
+    start_time = time.clock()
+    sparse_mul_sp(csr_mat, spm)
+    time_t[5] = time.clock() - start_time
+
+
     type = file_t.split('/')[-2]
-    time_t = map(lambda x:x*1000*1000/vector_num, time_t)
+    time_t = map(lambda x:x*1000*1000/1024, time_t)
     f.write('%s, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n'%((type,) +tuple(time_t)))
 f.close()
